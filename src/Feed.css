@@ -3,6 +3,11 @@
     color: white;
 }
 
+.chartsection {
+    display: flex;
+    flex-direction: column;
+}
+
 .portfolio {
     text-align: left;
 }
@@ -13,4 +18,8 @@
 
 .portfolio p {
     margin: 0;
+}
+
+.chart{
+    width: 100%;
 }
