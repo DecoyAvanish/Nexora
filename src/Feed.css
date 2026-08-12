@@ -23,3 +23,30 @@
 .chart{
     width: 100%;
 }
+
+.buying {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #3B4754;
+    padding: 20px 0 20px 0;
+}
+
+.market {
+    margin-top: 60px;
+}
+
+.box {
+    height: 10vh;
+    padding: 20px;
+    border: 1px solid #31363A;
+    border-radius: 4px;
+    text-align: left;
+}
+
+.box p {
+    color: #7B858A;
+    font-size: 15px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 8px;
+}

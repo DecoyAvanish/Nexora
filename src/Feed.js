@@ -1,6 +1,7 @@
 import React from 'react'
 import './Feed.css'
 import LineGraph from './LineGraph'
+import TimeLine from './TimeLine'
 
 function Feed() {
   return (
@@ -13,6 +14,33 @@ function Feed() {
           </div>
           <div className = "chart">
             <LineGraph />
+            <TimeLine />
+          </div>
+        </div>
+        <div className = "buying">
+          <h2>Buying Power</h2>
+          <h2>$4.11</h2>
+        </div>
+        <div className = "market">
+          <div className = "box">
+            <p>Markets Closed</p>
+            <h1>Happy Thanksgiving</h1>
+          </div>
+        </div>
+        <div className = "poplist">
+          <div className = "intro">
+            <h1>Popular lists</h1>
+            <p>Sjow More</p>
+          </div>
+          <div className = "badges">
+            {popularTopics.map((topic) => (
+              <Chip
+                className = "badge"
+                variant = "outlined"
+                label = {topic}
+                avatar = {<Avatar src = {``}/>}
+              />
+            ))}
           </div>
         </div>
       </div>
