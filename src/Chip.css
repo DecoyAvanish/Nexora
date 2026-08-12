@@ -1,0 +1,58 @@
+/* Chip.css - Dark Theme */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px 6px 8px;
+  border: 1px solid #3a3f45;
+  border-radius: 20px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+  color: #e0e0e0;
+}
+
+.chip:hover {
+  border-color: #5AC53B;
+  background: rgba(90, 197, 59, 0.1);
+  transform: translateY(-1px);
+}
+
+.chip-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #2a2e33;
+  color: #5AC53B;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.chip-icon img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.chip-label {
+  font-weight: 500;
+  color: #e0e0e0;
+  white-space: nowrap;
+}
+
+/* Optional: Different variants */
+.chip.active {
+  border-color: #5AC53B;
+  background: rgba(90, 197, 59, 0.15);
+}
+
+.chip.active .chip-icon {
+  background: #5AC53B;
+  color: #1a1a1a;
+}

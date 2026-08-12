@@ -50,3 +50,14 @@
     font-weight: 700;
     margin-bottom: 8px;
 }
+
+.poplist {
+    margin-top: 60px;
+}
+
+.poplist .intro {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0 20px 0;
+}

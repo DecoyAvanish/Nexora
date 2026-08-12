@@ -2,6 +2,19 @@ import React from 'react'
 import './Feed.css'
 import LineGraph from './LineGraph'
 import TimeLine from './TimeLine'
+import Chip from './Chip'
+
+const popularTopics = [
+  { name: "Technology", icon: "💻" },
+  { name: "Top Movies", icon: "🎬" },
+  { name: "Upcoming Earnings", icon: "📈" },
+  { name: "Cryptocurrency", icon: "₿" },
+  { name: "Cannabis", icon: "🌿" },
+  { name: "Healthcare Supplies", icon: "🏥" },
+  { name: "Index ETFs", icon: "📊" },
+  { name: "China", icon: "🇨🇳" },
+  { name: "Pharmacy", icon: "💊" }
+];
 
 function Feed() {
   return (
@@ -30,15 +43,14 @@ function Feed() {
         <div className = "poplist">
           <div className = "intro">
             <h1>Popular lists</h1>
-            <p>Sjow More</p>
+            <p>Show More</p>
           </div>
           <div className = "badges">
             {popularTopics.map((topic) => (
-              <Chip
-                className = "badge"
-                variant = "outlined"
-                label = {topic}
-                avatar = {<Avatar src = {``}/>}
+              <Chip 
+                key={topic.name}
+                label = {topic.name}
+                icon={topic.icon}
               />
             ))}
           </div>
