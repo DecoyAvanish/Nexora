@@ -1,7 +1,5 @@
-/* Auth.css - Clean Dark Theme with Brighter Animations */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
 
-/* ===== ANIMATIONS ===== */
 @keyframes float {
   0%, 100% { transform: translateY(0px) rotate(0deg); }
   50% { transform: translateY(-25px) rotate(2deg); }
@@ -309,14 +307,14 @@
   gap: 20px;
 }
 
-.form .group {
+.group {
   display: flex;
   flex-direction: column;
   gap: 4px;
   position: relative;
 }
 
-.form .group label {
+.group label {
   font-family: 'Orbitron', sans-serif;
   color: rgba(255, 255, 255, 0.15);
   font-size: 9px;
@@ -327,11 +325,11 @@
   padding-left: 2px;
 }
 
-.form .group:focus-within label {
+.group:focus-within label {
   color: rgba(90, 197, 59, 0.4);
 }
 
-.form .group .wrapper {
+.wrapper {
   position: relative;
   overflow: hidden;
   border-radius: 14px;
@@ -340,12 +338,12 @@
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.form .group .wrapper:hover {
+.wrapper:hover {
   border-color: rgba(90, 197, 59, 0.08);
   background: rgba(255, 255, 255, 0.03);
 }
 
-.form .group .wrapper:focus-within {
+.wrapper:focus-within {
   border-color: rgba(90, 197, 59, 0.15);
   background: rgba(90, 197, 59, 0.02);
   box-shadow: 
@@ -355,7 +353,7 @@
   animation: inputGlow 2s ease-in-out infinite;
 }
 
-.form .group .wrapper input {
+.wrapper input {
   width: 100%;
   padding: 16px 18px;
   background: transparent;
@@ -369,22 +367,22 @@
   font-family: 'Inter', sans-serif;
 }
 
-.form .group .wrapper input::placeholder {
+.wrapper input::placeholder {
   color: rgba(255, 255, 255, 0.05);
   font-weight: 300;
   letter-spacing: 1px;
 }
 
-.form .group .wrapper input:focus {
+.wrapper input:focus {
   outline: none;
 }
 
-.form .group .wrapper input:-webkit-autofill {
+.wrapper input:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 30px transparent inset !important;
   -webkit-text-fill-color: rgba(255, 255, 255, 0.8) !important;
 }
 
-.form .group .wrapper .icon {
+.wrapper .icon {
   position: absolute;
   right: 16px;
   top: 50%;
@@ -395,11 +393,11 @@
   pointer-events: none;
 }
 
-.form .group .wrapper:hover .icon {
+.wrapper:hover .icon {
   color: rgba(255, 255, 255, 0.05);
 }
 
-.form .group .wrapper:focus-within .icon {
+.wrapper:focus-within .icon {
   color: rgba(90, 197, 59, 0.12);
   transform: translateY(-50%) scale(1.15);
 }
@@ -413,7 +411,7 @@
   padding-left: 2px;
 }
 
-.form .error {
+.error {
   padding: 14px 18px;
   background: rgba(255, 71, 87, 0.03);
   border: 1px solid rgba(255, 71, 87, 0.04);
@@ -426,7 +424,7 @@
   font-family: 'Inter', sans-serif;
 }
 
-.form .btn {
+.btn {
   padding: 18px;
   background: linear-gradient(135deg, rgba(90, 197, 59, 0.04) 0%, rgba(54, 241, 205, 0.04) 100%);
   border: 1px solid rgba(90, 197, 59, 0.04);
@@ -444,7 +442,7 @@
   font-family: 'Orbitron', sans-serif;
 }
 
-.form .btn::before {
+.btn::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -459,7 +457,7 @@
   transition: opacity 0.5s ease;
 }
 
-.form .btn::after {
+.btn::after {
   content: '';
   position: absolute;
   top: -50%;
@@ -472,7 +470,7 @@
   pointer-events: none;
 }
 
-.form .btn .content {
+.btn .content {
   position: relative;
   z-index: 1;
   display: flex;
@@ -481,13 +479,13 @@
   gap: 10px;
 }
 
-.form .btn .arrow {
+.btn .arrow {
   display: inline-block;
   transition: transform 0.4s ease;
   color: rgba(90, 197, 59, 0.2);
 }
 
-.form .btn:hover:not(:disabled) {
+.btn:hover:not(:disabled) {
   background: linear-gradient(135deg, rgba(90, 197, 59, 0.06) 0%, rgba(54, 241, 205, 0.06) 100%);
   border-color: rgba(90, 197, 59, 0.08);
   color: rgba(255, 255, 255, 0.7);
@@ -495,24 +493,24 @@
   box-shadow: 0 20px 60px rgba(90, 197, 59, 0.04);
 }
 
-.form .btn:hover:not(:disabled)::before {
+.btn:hover:not(:disabled)::before {
   opacity: 1;
 }
 
-.form .btn:hover:not(:disabled)::after {
+.btn:hover:not(:disabled)::after {
   opacity: 1;
 }
 
-.form .btn:hover:not(:disabled) .arrow {
+.btn:hover:not(:disabled) .arrow {
   transform: translateX(6px) scale(1.1);
   color: rgba(90, 197, 59, 0.4);
 }
 
-.form .btn:active:not(:disabled) {
+.btn:active:not(:disabled) {
   transform: translateY(0) scale(0.97);
 }
 
-.form .btn:disabled {
+.btn:disabled {
   opacity: 0.1;
   cursor: not-allowed;
   transform: none !important;
@@ -586,6 +584,7 @@
   width: 100%;
 }
 
+/* ===== STATUS ===== */
 .status {
   display: flex;
   align-items: center;
