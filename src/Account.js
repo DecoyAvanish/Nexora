@@ -1,4 +1,3 @@
-// Account.js - User Account page
 import React, { useState, useEffect } from 'react';
 import { auth, signOut, database, updateProfile } from './firebase';
 import { doc, getDoc, updateDoc, onSnapshot } from 'firebase/firestore';

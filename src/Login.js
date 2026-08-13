@@ -40,53 +40,97 @@ function Login({ onLogin, onSwitchToSignUp }) {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <div className="auth-header">
-          <h1>Welcome Back</h1>
-          <p>Sign in to your Nexora account</p>
+    <div className="authcontainer">
+      <div className="field">
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+      </div>
+      
+      <div className="orb orb1"></div>
+      <div className="orb orb2"></div>
+      <div className="orb orb3"></div>
+      
+      <div className="overlay"></div>
+      
+      <div className="card">
+        <div className="header">
+          <div className="logo">
+            <div className="ring">
+              <span className="icon">📈</span>
+            </div>
+          </div>
+          <h1>Elevate Your Portfolio</h1>
+          <p className="subtitle">Enter the <span>Nexora</span> Terminal</p>
         </div>
         
-        <form onSubmit={handleLogin} className="auth-form">
-          <div className="form-group">
-            <label>Email Address</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              required
-            />
+        <form onSubmit={handleLogin} className="form">
+          <div className="group">
+            <label>Username / Email</label>
+            <div className="wrapper">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@edge.com"
+                required
+              />
+              <span className="icon">⌘</span>
+            </div>
           </div>
           
-          <div className="form-group">
-            <label>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              required
-            />
+          <div className="group">
+            <label>Access Key</label>
+            <div className="wrapper">
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
+              <span className="icon">⚡</span>
+            </div>
           </div>
           
-          {error && <div className="auth-error">{error}</div>}
+          {error && <div className="error">{error}</div>}
           
-          <button type="submit" className="auth-btn" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
+          <button type="submit" className="btn" disabled={loading}>
+            <span className="content">
+              {loading ? 'Authenticating...' : 'Enter the Matrix'}
+              <span className="arrow">→</span>
+            </span>
           </button>
         </form>
         
-        <div className="auth-footer">
+        <div className="divider">
+          <span>or</span>
+        </div>
+        
+        <div className="footer">
           <p>
-            Don't have an account?{' '}
+            Ready to dominate the markets?{' '}
             <button 
-              className="auth-switch-btn" 
+              className="switchbtn" 
               onClick={onSwitchToSignUp}
             >
-              Sign Up
+              Join the Elite
             </button>
           </p>
+        </div>
+        
+        <div className="status">
+          <span className="dot"></span>
+          System Online • v3.2.1
         </div>
       </div>
     </div>

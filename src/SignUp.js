@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { createUserWithEmailAndPassword, updateProfile, auth, database } from './firebase';
+import { 
+  auth, 
+  createUserWithEmailAndPassword, 
+  updateProfile, 
+  database 
+} from './firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import './Auth.css';
 
@@ -15,13 +20,11 @@ function SignUp({ onSignUp, onSwitchToLogin }) {
     e.preventDefault();
     setError('');
 
-    // Validate passwords match
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
 
-    // Validate password strength
     if (password.length < 6) {
       setError('Password must be at least 6 characters');
       return;
@@ -30,14 +33,11 @@ function SignUp({ onSignUp, onSwitchToLogin }) {
     setLoading(true);
 
     try {
-      // Create user with email and password
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Update user profile with display name
       await updateProfile(user, { displayName });
 
-      // Save user data to Firestore
       await setDoc(doc(database, 'users', user.uid), {
         uid: user.uid,
         email: user.email,
@@ -76,76 +76,126 @@ function SignUp({ onSignUp, onSwitchToLogin }) {
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <div className="auth-header">
-          <h1>Create Account</h1>
-          <p>Start investing with Nexora</p>
+    <div className="authcontainer">
+      <div className="field">
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+        <div className="particle"></div>
+      </div>
+      
+      <div className="orb orb1"></div>
+      <div className="orb orb2"></div>
+      <div className="orb orb3"></div>
+      
+      <div className="overlay"></div>
+      
+      <div className="card">
+        <div className="header">
+          <div className="logo">
+            <div className="ring">
+              <span className="icon">🚀</span>
+            </div>
+          </div>
+          <h1>Forge Your Legacy</h1>
+          <p className="subtitle">Join the <span>Nexora</span> Revolution</p>
         </div>
         
-        <form onSubmit={handleSignUp} className="auth-form">
-          <div className="form-group">
+        <form onSubmit={handleSignUp} className="form">
+          <div className="group">
             <label>Full Name</label>
-            <input
-              type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="John Doe"
-              required
-            />
+            <div className="wrapper">
+              <input
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Your Identity"
+                required
+              />
+              <span className="icon">◈</span>
+            </div>
           </div>
           
-          <div className="form-group">
+          <div className="group">
             <label>Email Address</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              required
-            />
+            <div className="wrapper">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@empire.com"
+                required
+              />
+              <span className="icon">⌘</span>
+            </div>
           </div>
           
-          <div className="form-group">
-            <label>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Create a password"
-              required
-            />
-            <small className="password-hint">Must be at least 6 characters</small>
+          <div className="group">
+            <label>Secret Key</label>
+            <div className="wrapper">
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Create your code"
+                required
+              />
+              <span className="icon">⚡</span>
+            </div>
+            <small className="hint">Minimum 6 characters • Must be unbreakable</small>
           </div>
           
-          <div className="form-group">
-            <label>Confirm Password</label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm your password"
-              required
-            />
+          <div className="group">
+            <label>Confirm Secret Key</label>
+            <div className="wrapper">
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Verify your code"
+                required
+              />
+              <span className="icon">✓</span>
+            </div>
           </div>
           
-          {error && <div className="auth-error">{error}</div>}
+          {error && <div className="error">{error}</div>}
           
-          <button type="submit" className="auth-btn" disabled={loading}>
-            {loading ? 'Creating Account...' : 'Create Account'}
+          <button type="submit" className="btn" disabled={loading}>
+            <span className="content">
+              {loading ? 'Forging Account...' : 'Start Your Empire'}
+              <span className="arrow">→</span>
+            </span>
           </button>
         </form>
         
-        <div className="auth-footer">
+        <div className="divider">
+          <span>or</span>
+        </div>
+        
+        <div className="footer">
           <p>
             Already have an account?{' '}
             <button 
-              className="auth-switch-btn" 
+              className="switchbtn" 
               onClick={onSwitchToLogin}
             >
-              Sign In
+              Enter the Terminal
             </button>
           </p>
+        </div>
+        
+        <div className="status">
+          <span className="dot"></span>
+          System Online • v3.2.1
         </div>
       </div>
     </div>
