@@ -1,20 +1,24 @@
-// Header.js - Updated with navigation
 import React from 'react';
 import Logo from './robinhood.svg';
 import './Header.css';
 
-function Header({ onNavigate, currentPage }) {
+function Header({ onNavigate, currentPage, user, onLogout }) {
   const navItems = [
-    { id: 'stocks', label: 'Stocks' },
     { id: 'portfolio', label: 'Portfolio' },
-    { id: 'cash', label: 'Cash' },
-    { id: 'messages', label: 'Messages' },
+    { id: 'stocks', label: 'Stocks' },
     { id: 'account', label: 'Account' },
   ];
 
+  const handleNavClick = (e, id) => {
+    e.preventDefault();
+    if (onNavigate) {
+      onNavigate(id);
+    }
+  };
+
   return (
     <div className="wrapper">
-      <div className="logo">
+      <div className="logo" onClick={() => onNavigate && onNavigate('portfolio')}>
         <img src={Logo} width={25} alt="Nexora" />
       </div>
       <div className="searchbar">
@@ -27,15 +31,22 @@ function Header({ onNavigate, currentPage }) {
           <a
             key={item.id}
             href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              onNavigate(item.id);
-            }}
+            onClick={(e) => handleNavClick(e, item.id)}
             className={currentPage === item.id ? 'active' : ''}
           >
             {item.label}
           </a>
         ))}
+        {user && (
+          <div className="user-info">
+            <span className="user-avatar">
+              {user.displayName?.[0] || user.email?.[0] || 'U'}
+            </span>
+            <span className="user-name">
+              {user.displayName || user.email?.split('@')[0] || 'User'}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
