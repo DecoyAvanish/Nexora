@@ -29,6 +29,7 @@ ChartJS.register(
   Filler
 );
 
+const FINNHUB_TOKEN = "d9tj431r01qujo6kusr0d9tj431r01qujo6kusrg";
 const API_BASE = 'http://localhost:5001/api';
 
 function Stocks() {
@@ -63,12 +64,58 @@ function Stocks() {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${API_BASE}/predict/${symbol}`);
+      console.log(`📊 Fetching data for ${symbol}...`);
+      const response = await axios.get(`${API_BASE}/predict/${symbol}`, {
+        timeout: 30000
+      });
+      console.log('✅ Stock data received:', response.data);
       setStockData(response.data);
       setSelectedStock({ symbol });
     } catch (err) {
-      console.error('Error fetching stock data:', err);
-      setError(err.response?.data?.error || 'Failed to load stock data');
+      console.error('❌ Error fetching stock data:', err);
+      let errorMsg = 'Failed to load stock data';
+      
+      if (err.code === 'ECONNABORTED') {
+        errorMsg = 'Request timed out. The prediction server might be busy.';
+      } else if (err.response?.status === 404) {
+        errorMsg = `No data found for ${symbol}. Please try another symbol.`;
+      } else if (err.response?.data?.error) {
+        errorMsg = err.response.data.error;
+      } else if (err.message) {
+        errorMsg = err.message;
+      }
+      
+      setError(`❌ ${errorMsg}`);
+      
+      try {
+        console.log(`🔄 Trying fallback for ${symbol}...`);
+        const fallbackResponse = await axios.get(
+          `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_TOKEN}`,
+          { timeout: 10000 }
+        );
+        if (fallbackResponse.data && fallbackResponse.data.c) {
+          const data = fallbackResponse.data;
+          setStockData({
+            symbol: symbol,
+            name: symbol,
+            last_price: data.c,
+            last_return: (data.c - data.pc) / data.pc,
+            predicted_return: 0,
+            predicted_price: data.c,
+            confidence: 0.5,
+            chart_data: {
+              dates: [new Date().toISOString().split('T')[0]],
+              prices: [data.c],
+              volume: [0]
+            }
+          });
+          setSelectedStock({ symbol });
+          setError(null);
+          console.log('✅ Fallback data loaded');
+        }
+      } catch (fallbackErr) {
+        console.log('⚠️ Fallback failed:', fallbackErr.message);
+      }
     } finally {
       setLoading(false);
     }

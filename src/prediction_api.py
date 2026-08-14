@@ -1,25 +1,22 @@
-# prediction_api.py - Fixed version with correct list conversion
 import numpy as np
-import pandas as pd
-import yfinance as yf
 import torch
 import torch.nn as nn
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from datetime import datetime, timedelta
 import json
 import os
+import sys
 import warnings
+import requests
+import re
+from datetime import datetime, timedelta
 warnings.filterwarnings('ignore')
 
 app = Flask(__name__)
 CORS(app)
 
-# ============ YOUR FINNHUB API KEY ============
 FINNHUB_API_KEY = "d9tj431r01qujo6kusr0d9tj431r01qujo6kusrg"
-# ==============================================
 
-# ============ YOUR LSTM MODEL ============
 class PredictionModel(nn.Module):
     def __init__(self, input_dim, hidden_dim, num_layers, output_dim, dropout=0.2):
         super(PredictionModel, self).__init__()
@@ -41,7 +38,6 @@ class PredictionModel(nn.Module):
         out = self.fc(out)
         return out
 
-# Feature columns (must match your training)
 feature_cols = [
     'Return', 'LogVolume', 'MA10_ratio', 'MA50_ratio',
     'Volatility10', 'HighLowRange', 'RSI'
@@ -49,114 +45,219 @@ feature_cols = [
 
 device = torch.device('cpu')
 
-# Initialize model
 model = PredictionModel(input_dim=len(feature_cols), hidden_dim=32, num_layers=2, output_dim=1, dropout=0.2)
 model.to(device)
 
-# Load your trained weights
-model_path = '../model_weights.pth'  # Since prediction_api.py is in src/, model_weights.pth is in parent
-if os.path.exists(model_path):
-    model.load_state_dict(torch.load(model_path, map_location=device))
-    model.eval()
-    print(f"✅ Loaded model from {model_path}")
-else:
-    print(f"⚠️ Model file not found at {model_path}")
-    print("Using untrained model for demonstration")
+def find_model_file():
+    possible_paths = [
+        '../model_weights.pth',
+        'model_weights.pth',
+        '../../model_weights.pth',
+        './model_weights.pth',
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), 'model_weights.pth'),
+        os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'model_weights.pth'),
+    ]
+    for path in possible_paths:
+        if os.path.exists(path):
+            return path
+    return None
 
-# Load scaler if it exists
+model_path = find_model_file()
+if model_path and os.path.exists(model_path):
+    try:
+        model.load_state_dict(torch.load(model_path, map_location=device, weights_only=False))
+        model.eval()
+        print(f"✅ Loaded model from {model_path}")
+    except Exception as e:
+        print(f"⚠️ Error loading model: {e}")
+else:
+    print(f"⚠️ Model file not found - using untrained model")
+
 scaler = None
 try:
     import joblib
-    scaler_path = '../scaler.pkl'
-    if os.path.exists(scaler_path):
-        scaler = joblib.load(scaler_path)
-        print("✅ Loaded scaler from scaler.pkl")
-except:
-    print("⚠️ Could not load scaler, using default normalization")
+    scaler_paths = [
+        '../scaler.pkl',
+        'scaler.pkl',
+        '../../scaler.pkl',
+        './scaler.pkl',
+    ]
+    for path in scaler_paths:
+        if os.path.exists(path):
+            scaler = joblib.load(path)
+            print(f"✅ Loaded scaler from {path}")
+            break
+except Exception as e:
+    print(f"⚠️ Could not load scaler: {e}")
 
-# ============ HELPER FUNCTIONS ============
-
-def get_stock_data(symbol, period='6mo'):
-    """Fetch stock data and prepare features"""
+def fetch_stock_data(symbol):
+    """Fetch stock data using yfinance"""
     try:
-        df = yf.download(symbol, period=period, progress=False)
-        if df.empty:
+        import yfinance as yf
+        print(f"📊 Fetching data for {symbol}...")
+        
+        stock = yf.Ticker(symbol)
+        hist = stock.history(period='6mo')
+        
+        if hist is None or hist.empty:
+            print(f"❌ No data found for {symbol}")
             return None
         
-        # Prepare features (same as your notebook)
-        data = df[['Close', 'High', 'Low', 'Volume']].copy()
-        data['Return'] = df['Close'].pct_change()
-        data['LogVolume'] = np.log(df['Volume'] + 1)
-        data['MA10_ratio'] = df['Close'] / df['Close'].rolling(10).mean() - 1
-        data['MA50_ratio'] = df['Close'] / df['Close'].rolling(50).mean() - 1
-        data['Volatility10'] = data['Return'].rolling(10).std()
-        data['HighLowRange'] = (df['High'] - df['Low']) / df['Close']
+        dates = []
+        closes = []
+        highs = []
+        lows = []
+        volumes = []
         
-        delta = df['Close'].diff()
-        gain = delta.clip(lower=0).rolling(14).mean()
-        loss = -delta.clip(upper=0).rolling(14).mean()
-        rs = gain / loss
-        data['RSI'] = 100 - (100 / (1 + rs))
+        for idx, row in hist.iterrows():
+            dates.append(idx.strftime('%Y-%m-%d'))
+            closes.append(float(row['Close']) if row['Close'] is not None else 0)
+            highs.append(float(row['High']) if row['High'] is not None else 0)
+            lows.append(float(row['Low']) if row['Low'] is not None else 0)
+            volumes.append(float(row['Volume']) if row['Volume'] is not None else 0)
         
-        data = data.replace([np.inf, -np.inf], np.nan).dropna()
-        return data
+        if not closes or len(closes) < 10:
+            print(f"❌ Not enough data for {symbol}")
+            return None
+        
+        print(f"✅ Got {len(closes)} data points for {symbol}")
+        
+        return {
+            'dates': dates,
+            'close': closes,
+            'high': highs,
+            'low': lows,
+            'volume': volumes,
+            'last_price': closes[-1],
+            'last_volume': volumes[-1] if volumes else 0
+        }
+        
     except Exception as e:
-        print(f"Error fetching {symbol}: {e}")
+        print(f"❌ Error fetching {symbol}: {e}")
         return None
 
-def prepare_prediction_data(data, seq_length=20):
-    """Prepare data for prediction"""
-    from sklearn.preprocessing import StandardScaler
+def calculate_features(data):
+    """Calculate technical features from price data"""
+    if not data or len(data['close']) < 30:
+        return None
     
-    feat = data[feature_cols].values
+    closes = data['close']
+    volumes = data['volume']
+    highs = data['high']
+    lows = data['low']
+    n = len(closes)
     
-    # Use the saved scaler if available
-    if scaler is not None:
-        feat_scaled = scaler.transform(feat)
-    else:
-        temp_scaler = StandardScaler()
-        feat_scaled = temp_scaler.fit_transform(feat)
+    features = []
     
-    # Get last seq_length days
-    if len(feat_scaled) < seq_length:
-        seq_length = len(feat_scaled)
+    for i in range(20, n):
+        try:
+            ret = (closes[i] - closes[i-1]) / closes[i-1] if closes[i-1] != 0 else 0
+            
+            log_vol = np.log(max(volumes[i], 1))
+            
+            ma10 = sum(closes[i-9:i+1]) / 10
+            ma10_ratio = closes[i] / ma10 - 1 if ma10 != 0 else 0
+            
+            start_idx = max(0, i-49)
+            ma50 = sum(closes[start_idx:i+1]) / (i - start_idx + 1)
+            ma50_ratio = closes[i] / ma50 - 1 if ma50 != 0 else 0
+            
+            returns = []
+            for j in range(i-9, i+1):
+                if closes[j-1] != 0:
+                    returns.append((closes[j] - closes[j-1]) / closes[j-1])
+            vol10 = np.std(returns) if len(returns) > 1 else 0
+            
+            hl_range = (highs[i] - lows[i]) / closes[i] if closes[i] != 0 else 0
+            
+            gains = []
+            losses = []
+            for j in range(i-13, i+1):
+                if j > 0:
+                    diff = closes[j] - closes[j-1]
+                    if diff > 0:
+                        gains.append(diff)
+                        losses.append(0)
+                    else:
+                        gains.append(0)
+                        losses.append(abs(diff))
+            
+            avg_gain = sum(gains[-14:]) / 14 if len(gains) >= 14 else 0
+            avg_loss = sum(losses[-14:]) / 14 if len(losses) >= 14 else 1
+            rs = avg_gain / avg_loss if avg_loss != 0 else 0
+            rsi = 100 - (100 / (1 + rs))
+            
+            features.append([ret, log_vol, ma10_ratio, ma50_ratio, vol10, hl_range, rsi])
+        except Exception as e:
+            print(f"⚠️ Feature calculation error at index {i}: {e}")
+            continue
     
-    last_seq = feat_scaled[-seq_length:]
-    return torch.from_numpy(last_seq).float().unsqueeze(0)
+    return np.array(features) if features else None
 
 def make_prediction(symbol):
     """Make a prediction for a given symbol"""
-    data = get_stock_data(symbol)
-    if data is None:
-        return None, None, None, None
+    print(f"📊 Predicting for: {symbol}")
+
+    data = fetch_stock_data(symbol)
+    if data is None or len(data['close']) < 30:
+        print(f"❌ Not enough data for {symbol}")
+        return None, None, None, None, None
     
-    # Prepare for prediction
-    seq_length = min(20, len(data) - 1)
-    X = prepare_prediction_data(data, seq_length)
-    X = X.to(device)
+    features = calculate_features(data)
+    if features is None or len(features) < 10:
+        print(f"❌ Could not calculate features for {symbol}")
+        return None, None, None, None, None
     
-    # Make prediction
-    with torch.no_grad():
-        pred_scaled = model(X).cpu().numpy()[0][0]
+    seq_length = min(20, len(features))
+    last_seq = features[-seq_length:]
     
-    # Get last price and return
-    last_close = data['Close'].iloc[-1]
-    last_return = data['Return'].iloc[-1] if len(data['Return']) > 0 else 0
+    try:
+        if scaler is not None:
+            last_seq_scaled = scaler.transform(last_seq)
+        else:
+            mean = np.mean(last_seq, axis=0)
+            std = np.std(last_seq, axis=0) + 1e-8
+            last_seq_scaled = (last_seq - mean) / std
+    except Exception as e:
+        print(f"⚠️ Scaling error: {e}")
+        mean = np.mean(last_seq, axis=0)
+        std = np.std(last_seq, axis=0) + 1e-8
+        last_seq_scaled = (last_seq - mean) / std
     
-    # Unscale prediction
-    pred_return = pred_scaled * 0.02  # Approximate unscaling
+    X = torch.from_numpy(last_seq_scaled).float().unsqueeze(0).to(device)
+    
+    try:
+        model.eval()
+        with torch.no_grad():
+            pred_scaled = model(X).cpu().numpy()[0][0]
+        
+        if scaler is not None:
+            try:
+                target_idx = feature_cols.index('Return')
+                pred_return = pred_scaled * scaler.scale_[target_idx] + scaler.mean_[target_idx]
+            except:
+                pred_return = pred_scaled * 0.02
+        else:
+            pred_return = pred_scaled * 0.02
+            
+    except Exception as e:
+        print(f"⚠️ Prediction error: {e}")
+        pred_return = 0.0
+    
+    last_close = data['last_price']
+    last_return = (data['close'][-1] - data['close'][-2]) / data['close'][-2] if len(data['close']) > 1 and data['close'][-2] != 0 else 0
+    
     predicted_price = last_close * (1 + pred_return)
     
-    # Return data with chart info
+    print(f"✅ Prediction for {symbol}: ${predicted_price:.2f}")
+    
     return last_close, last_return, pred_return, predicted_price, data
 
 def search_stocks(query):
     """Search for stocks using Finnhub"""
-    import re
-    
     try:
         url = f"https://finnhub.io/api/v1/search?q={query}&token={FINNHUB_API_KEY}"
-        response = requests.get(url)
+        response = requests.get(url, timeout=10)
         data = response.json()
         
         results = []
@@ -174,15 +275,15 @@ def search_stocks(query):
         print(f"Search error: {e}")
         return []
 
-# ============ API ENDPOINTS ============
-
 @app.route('/api/search/<query>', methods=['GET'])
 def search(query):
     """Search for stocks"""
     try:
+        print(f"🔍 Searching for: {query}")
         results = search_stocks(query)
         return jsonify({'result': results})
     except Exception as e:
+        print(f"❌ Search error: {e}")
         return jsonify({'error': str(e), 'result': []}), 500
 
 @app.route('/api/predict/<symbol>', methods=['GET'])
@@ -197,13 +298,14 @@ def predict(symbol):
         
         last_close, last_return, pred_return, predicted_price, data = result
         
-        # FIXED: Convert pandas objects to lists correctly
-        chart_data = {
-            # Use .tolist() for numpy arrays, or list() for pandas Series/Index
-            'dates': data.index.strftime('%Y-%m-%d').tolist(),  # This works! .tolist() is correct for pandas Index
-            'prices': data['Close'].tolist(),  # .tolist() works for pandas Series
-            'volume': data['Volume'].tolist()  # .tolist() works for pandas Series
-        }
+        dates = data['dates']
+        prices = data['close']
+        volumes = data['volume']
+        
+        if len(dates) > 120:
+            dates = dates[-120:]
+            prices = prices[-120:]
+            volumes = volumes[-120:]
         
         return jsonify({
             'symbol': symbol,
@@ -213,11 +315,15 @@ def predict(symbol):
             'predicted_return': float(pred_return),
             'predicted_price': float(predicted_price),
             'confidence': 0.72,
-            'chart_data': chart_data
+            'chart_data': {
+                'dates': dates,
+                'prices': prices,
+                'volume': volumes
+            }
         })
         
     except Exception as e:
-        print(f"Prediction error: {e}")
+        print(f"❌ Prediction error: {e}")
         import traceback
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
@@ -227,17 +333,46 @@ def health():
     """Health check endpoint"""
     return jsonify({
         'status': 'ok',
-        'model_loaded': os.path.exists(model_path),
+        'model_loaded': model_path is not None and os.path.exists(model_path),
         'scaler_loaded': scaler is not None
     })
+
+@app.route('/api/test/<symbol>', methods=['GET'])
+def test(symbol):
+    """Test endpoint"""
+    try:
+        symbol = symbol.upper()
+        print(f"🧪 Testing {symbol}...")
+        
+        import yfinance as yf
+        stock = yf.Ticker(symbol)
+        hist = stock.history(period='5d')
+        
+        if hist.empty:
+            return jsonify({'error': f'No data found for {symbol}'}), 404
+        
+        return jsonify({
+            'symbol': symbol,
+            'rows': len(hist),
+            'last_price': float(hist['Close'].iloc[-1]),
+            'dates': hist.index.strftime('%Y-%m-%d').tolist(),
+            'prices': hist['Close'].tolist()
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     print("=" * 60)
     print("🚀 Stock Prediction API Server")
     print("=" * 60)
-    print(f"📊 Model: {'✅ Loaded' if os.path.exists(model_path) else '❌ Not found'}")
+    print(f"📊 Model: {'✅ Loaded' if model_path and os.path.exists(model_path) else '❌ Not found'}")
     print(f"📊 Scaler: {'✅ Loaded' if scaler is not None else '⚠️ Using default'}")
     print(f"🔑 Finnhub API: {'✅ Configured' if FINNHUB_API_KEY else '❌ Missing!'}")
     print(f"🌐 Server running at http://localhost:5001")
     print("=" * 60)
-    app.run(debug=True, port=5001)
+    print("\n🔧 Test endpoints:")
+    print("  http://localhost:5001/api/health")
+    print("  http://localhost:5001/api/test/AAPL")
+    print("  http://localhost:5001/api/predict/AAPL")
+    print("\n" + "=" * 60)
+    app.run(debug=True, port=5001, host='0.0.0.0')

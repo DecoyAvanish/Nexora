@@ -1,5 +1,4 @@
 import React from 'react';
-import Logo from './robinhood.svg';
 import './Header.css';
 
 function Header({ onNavigate, currentPage, user, onLogout }) {
@@ -19,7 +18,6 @@ function Header({ onNavigate, currentPage, user, onLogout }) {
   return (
     <div className="wrapper">
       <div className="logo" onClick={() => onNavigate && onNavigate('portfolio')}>
-        <img src={Logo} width={25} alt="Nexora" />
         <span>NEXORA</span>
       </div>
       <div className="searchbar">
