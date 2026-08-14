@@ -23,20 +23,35 @@
 
 .stats .header {
   display: flex;
-  font-size: 13px;
+  font-size: 11px;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px 12px;
+  padding: 14px 20px 10px;
   font-weight: 600;
   font-family: 'IBM Plex Mono', monospace;
-  letter-spacing: 1px;
-  color: rgba(240, 237, 255, 0.4);
+  letter-spacing: 2px;
+  color: rgba(240, 237, 255, 0.3);
   border-bottom: 1px solid rgba(168, 85, 247, 0.04);
+  text-transform: uppercase;
+}
+
+.stats .header span {
+  color: rgba(168, 85, 247, 0.2);
+  font-size: 8px;
 }
 
 .list {
   border-top: 1px solid rgba(168, 85, 247, 0.04);
-  margin-top: 4px;
+  margin-top: 0;
+}
+
+.content {
+  padding: 0;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
 }
 
 @media (max-width: 768px) {

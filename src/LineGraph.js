@@ -10,7 +10,7 @@ function LineGraph() {
 
   const createMockData = () => {
     let data = [];
-    let val = 50;
+    let val = 100;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -20,8 +20,8 @@ function LineGraph() {
       date.setHours(Math.floor(Math.random() * 24));
       date.setMinutes(Math.floor(Math.random() * 60));
       date.setSeconds(Math.floor(Math.random() * 60));
-      val += Math.round((Math.random() < 0.5 ? 1 : 0) * Math.random() * 10);
-      data.push({ x: date, y: val });
+      val += Math.round((Math.random() < 0.5 ? 1 : 0) * Math.random() * 8);
+      data.push({ x: date, y: Math.max(val, 30) });
     }
     setGraphData(data);
   }
@@ -90,6 +90,9 @@ function LineGraph() {
           plugins: {
             legend: {
               display: false
+            },
+            tooltip: {
+              enabled: false
             }
           },
           maintainAspectRatio: false,

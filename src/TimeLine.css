@@ -1,24 +1,26 @@
 .timelinecontainer {
   display: flex;
-  border-bottom: 1px solid rgba(168, 85, 247, 0.04);
-  padding-top: 8px;
+  padding: 4px 0 0;
+  margin-top: 0;
 }
 
 .buttonscontainer {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
+  width: 100%;
 }
 
 .button {
   font-weight: 600;
-  padding: 8px 14px 14px;
+  padding: 6px 14px 10px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 11px;
   color: rgba(240, 237, 255, 0.2);
   font-family: 'IBM Plex Mono', monospace;
   transition: all 0.3s ease;
   letter-spacing: 0.5px;
+  border-bottom: 2px solid transparent;
 }
 
 .button:hover {
@@ -27,5 +29,12 @@
 
 .button.active {
   color: #A855F7;
-  border-bottom: 2px solid #A855F7;
+  border-bottom-color: #A855F7;
+}
+
+@media (max-width: 768px) {
+  .button {
+    font-size: 10px;
+    padding: 4px 10px 8px;
+  }
 }

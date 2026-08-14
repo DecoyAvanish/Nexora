@@ -25,9 +25,13 @@ function Feed() {
             <h1>$114,656</h1>
             <p><span className="positive">+44.63 (+0.04%)</span> Today</p>
           </div>
-          <div className="chart">
-            <LineGraph />
-            <TimeLine />
+          <div className="chart-wrapper">
+            <div className="chart">
+              <LineGraph />
+            </div>
+            <div className="timeline-wrapper">
+              <TimeLine />
+            </div>
           </div>
         </div>
         <div className="buying">

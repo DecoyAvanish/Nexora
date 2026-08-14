@@ -2,18 +2,19 @@ import React from 'react'
 import './TimeLine.css'
 
 function TimeLine() {
-    return (
-        <div className = "timelinecontainer">
-            <div className = "buttonscontainer">
-                <div className = "button">LIVE</div>
-                <div className = "button">1D</div>
-                <div className = "button active">1W</div>
-                <div className = "button">3M</div>
-                <div className = "button">1Y</div>
-                <div className = "button">ALL</div>
-            </div>
-        </div>
-    )
+  const timeframes = ['LIVE', '1D', '1W', '1M', '3M', '1Y', 'ALL'];
+  
+  return (
+    <div className="timelinecontainer">
+      <div className="buttonscontainer">
+        {timeframes.map((tf) => (
+          <div key={tf} className={`button ${tf === '1W' ? 'active' : ''}`}>
+            {tf}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 export default TimeLine
