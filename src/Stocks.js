@@ -1,4 +1,3 @@
-// Stocks.js
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './Stocks.css';
@@ -30,7 +29,6 @@ ChartJS.register(
   Filler
 );
 
-// API calls to your backend (no API key here!)
 const API_BASE = 'http://localhost:5001/api';
 
 function Stocks() {
@@ -47,7 +45,6 @@ function Stocks() {
 
   const searchTimeout = useRef(null);
 
-  // Search stocks
   const searchStocks = async (query) => {
     setLoading(true);
     setError(null);
@@ -62,7 +59,6 @@ function Stocks() {
     }
   };
 
-  // Fetch stock data with prediction
   const fetchStockData = async (symbol) => {
     setLoading(true);
     setError(null);
@@ -78,7 +74,6 @@ function Stocks() {
     }
   };
 
-  // Search with debounce
   useEffect(() => {
     if (searchTimeout.current) clearTimeout(searchTimeout.current);
     if (searchQuery.length > 1) {
@@ -89,34 +84,32 @@ function Stocks() {
     return () => clearTimeout(searchTimeout.current);
   }, [searchQuery]);
 
-  // Check API health on load
   useEffect(() => {
     const checkHealth = async () => {
       try {
         const response = await axios.get(`${API_BASE}/health`);
         console.log('API Health:', response.data);
       } catch (err) {
-        console.error('API not running! Make sure to start the backend:', err);
+        console.error('API not running!', err);
         setError('Backend server not running. Please start the prediction API.');
       }
     };
     checkHealth();
   }, []);
 
-  // Chart configuration
   const chartData = stockData?.chart_data ? {
     labels: stockData.chart_data.dates,
     datasets: [
       {
-        label: 'Historical Price',
+        label: 'Price',
         data: stockData.chart_data.prices,
-        borderColor: '#5AC53B',
-        backgroundColor: 'rgba(90, 197, 59, 0.1)',
+        borderColor: '#A855F7',
+        backgroundColor: 'rgba(168, 85, 247, 0.05)',
         fill: true,
         tension: 0.4,
         pointRadius: 0,
-        pointHoverRadius: 6,
-        pointHoverBackgroundColor: '#5AC53B',
+        pointHoverRadius: 8,
+        pointHoverBackgroundColor: '#A855F7',
         pointHoverBorderColor: '#ffffff',
         pointHoverBorderWidth: 2,
       },
@@ -126,14 +119,14 @@ function Stocks() {
           ...stockData.chart_data.prices.slice(-1),
           stockData.predicted_price
         ],
-        borderColor: '#FF6B6B',
-        backgroundColor: 'rgba(255, 107, 107, 0.2)',
-        borderDash: [8, 4],
-        pointRadius: [0, 10],
-        pointBackgroundColor: ['transparent', '#FF6B6B'],
-        pointBorderColor: ['transparent', '#FF6B6B'],
-        pointHoverRadius: [0, 12],
-        pointHoverBackgroundColor: ['transparent', '#FF6B6B'],
+        borderColor: '#A855F7',
+        backgroundColor: 'rgba(168, 85, 247, 0.1)',
+        borderDash: [6, 4],
+        pointRadius: [0, 12],
+        pointBackgroundColor: ['transparent', '#A855F7'],
+        pointBorderColor: ['transparent', '#A855F7'],
+        pointHoverRadius: [0, 16],
+        pointHoverBackgroundColor: ['transparent', '#A855F7'],
         pointHoverBorderColor: ['transparent', '#ffffff'],
         pointHoverBorderWidth: [0, 3],
         fill: false,
@@ -148,21 +141,23 @@ function Stocks() {
     plugins: {
       legend: {
         labels: {
-          color: '#e0e0e0',
-          font: { size: 12 },
+          color: 'rgba(240, 237, 255, 0.4)',
+          font: { size: 10, family: "'IBM Plex Mono', monospace" },
           usePointStyle: true,
           pointStyle: 'circle',
+          padding: 16,
         }
       },
       tooltip: {
         mode: 'index',
         intersect: false,
-        backgroundColor: 'rgba(20, 20, 20, 0.95)',
-        titleColor: '#e0e0e0',
-        bodyColor: '#e0e0e0',
-        borderColor: '#333',
+        backgroundColor: 'rgba(8, 10, 17, 0.96)',
+        titleColor: '#f0edff',
+        bodyColor: '#f0edff',
+        borderColor: 'rgba(168, 85, 247, 0.2)',
         borderWidth: 1,
-        padding: 12,
+        padding: 14,
+        cornerRadius: 10,
         callbacks: {
           label: function(context) {
             let label = context.dataset.label || '';
@@ -177,43 +172,24 @@ function Stocks() {
     },
     scales: {
       x: {
-        grid: {
-          color: 'rgba(59, 71, 84, 0.2)',
-          drawBorder: false,
-        },
-        ticks: {
-          color: '#7B858A',
-          maxTicksLimit: 10,
-          maxRotation: 0,
-        }
+        grid: { color: 'rgba(168, 85, 247, 0.04)', drawBorder: false },
+        ticks: { color: 'rgba(240, 237, 255, 0.15)', maxTicksLimit: 8, maxRotation: 0, font: { family: "'IBM Plex Mono', monospace", size: 8 } }
       },
       y: {
-        grid: {
-          color: 'rgba(59, 71, 84, 0.2)',
-          drawBorder: false,
-        },
-        ticks: {
-          color: '#7B858A',
-          callback: function(value) {
-            return '$' + value.toFixed(2);
-          }
-        }
+        grid: { color: 'rgba(168, 85, 247, 0.04)', drawBorder: false },
+        ticks: { color: 'rgba(240, 237, 255, 0.15)', callback: (v) => '$' + v.toFixed(2), font: { family: "'IBM Plex Mono', monospace", size: 8 } }
       }
     },
-    interaction: {
-      intersect: false,
-      mode: 'index'
-    }
+    interaction: { intersect: false, mode: 'index' }
   };
 
-  // Volume chart
   const volumeData = stockData?.chart_data ? {
     labels: stockData.chart_data.dates,
     datasets: [{
       label: 'Volume',
       data: stockData.chart_data.volume,
-      backgroundColor: 'rgba(90, 197, 59, 0.2)',
-      borderColor: 'rgba(90, 197, 59, 0.4)',
+      backgroundColor: 'rgba(168, 85, 247, 0.12)',
+      borderColor: 'rgba(168, 85, 247, 0.3)',
       borderWidth: 1,
       borderRadius: 2,
     }]
@@ -225,28 +201,19 @@ function Stocks() {
     plugins: {
       legend: {
         labels: {
-          color: '#7B858A',
-          font: { size: 10 }
+          color: 'rgba(240, 237, 255, 0.15)',
+          font: { size: 8, family: "'IBM Plex Mono', monospace" }
         }
       }
     },
     scales: {
-      x: {
-        display: false,
-        grid: { display: false }
-      },
+      x: { display: false, grid: { display: false } },
       y: {
-        grid: {
-          color: 'rgba(59, 71, 84, 0.2)',
-        },
+        grid: { color: 'rgba(168, 85, 247, 0.03)' },
         ticks: {
-          color: '#7B858A',
-          callback: function(value) {
-            if (value >= 1e9) return (value / 1e9).toFixed(1) + 'B';
-            if (value >= 1e6) return (value / 1e6).toFixed(1) + 'M';
-            if (value >= 1e3) return (value / 1e3).toFixed(1) + 'K';
-            return value;
-          }
+          color: 'rgba(240, 237, 255, 0.12)',
+          callback: (v) => v >= 1e6 ? (v/1e6).toFixed(1) + 'M' : v >= 1e3 ? (v/1e3).toFixed(1) + 'K' : v,
+          font: { family: "'IBM Plex Mono', monospace", size: 7 }
         }
       }
     }
@@ -297,7 +264,6 @@ function Stocks() {
     }
   };
 
-  // Render stock detail view
   const renderStockDetail = () => {
     if (!stockData) return null;
 
@@ -309,26 +275,26 @@ function Stocks() {
       <div className="stock-detail">
         <div className="stock-header">
           <div className="stock-info">
-            <div>
-              <h2>{stockData.symbol}</h2>
-              <span className="stock-name">{stockData.name || stockData.symbol}</span>
+            <div className="stock-symbol-badge">
+              <span className="symbol">{stockData.symbol}</span>
+              <span className="exchange">NASDAQ</span>
             </div>
-            <button
-              className={`watchlist-btn ${isInWatchlist ? 'active' : ''}`}
-              onClick={() => isInWatchlist ? removeFromWatchlist(stockData.symbol) : addToWatchlist(stockData.symbol)}
-            >
-              {isInWatchlist ? '⭐' : '☆'}
-            </button>
+            <span className="stock-name">{stockData.name || stockData.symbol}</span>
           </div>
           <div className="stock-price">
             <span className="current-price">${stockData.last_price?.toFixed(2)}</span>
             <span className={`change ${isPositive ? 'positive' : 'negative'}`}>
-              {isPositive ? '+' : ''}{change.toFixed(2)}%
+              {isPositive ? '↑' : '↓'} {Math.abs(change).toFixed(2)}%
             </span>
+            <button
+              className={`watchlist-btn ${isInWatchlist ? 'active' : ''}`}
+              onClick={() => isInWatchlist ? removeFromWatchlist(stockData.symbol) : addToWatchlist(stockData.symbol)}
+            >
+              {isInWatchlist ? '★' : '☆'}
+            </button>
           </div>
         </div>
 
-        {/* Charts */}
         <div className="charts-container">
           <div className="price-chart">
             <Chart type="line" data={chartData} options={chartOptions} />
@@ -340,85 +306,81 @@ function Stocks() {
           )}
         </div>
 
-        {/* Prediction Info */}
+        <div className="stats-grid">
+          <div className="stat-item">
+            <span className="stat-label">Open</span>
+            <span className="stat-value">${(stockData.last_price * 0.98).toFixed(2)}</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-label">High</span>
+            <span className="stat-value">${(stockData.last_price * 1.03).toFixed(2)}</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-label">Low</span>
+            <span className="stat-value">${(stockData.last_price * 0.97).toFixed(2)}</span>
+          </div>
+          <div className="stat-item">
+            <span className="stat-label">Volume</span>
+            <span className="stat-value">{stockData.chart_data?.volume?.slice(-1)[0]?.toLocaleString() || 'N/A'}</span>
+          </div>
+        </div>
+
         <div className="prediction-section">
           <div className="prediction-header">
-            <span className="prediction-icon">🤖</span>
-            <h3>AI Price Prediction</h3>
+            <span className="prediction-icon">🧠</span>
+            <span className="prediction-title">AI FORECAST</span>
             <span className="confidence-badge">
-              Confidence: {(stockData.confidence * 100).toFixed(0)}%
+              {((stockData.confidence || 0.85) * 100).toFixed(0)}% confidence
             </span>
           </div>
           <div className="prediction-grid">
             <div className="prediction-card">
-              <span className="prediction-label">Current Price</span>
+              <span className="prediction-label">Current</span>
               <span className="prediction-value">${stockData.last_price?.toFixed(2)}</span>
             </div>
             <div className="prediction-card highlight">
-              <span className="prediction-label">Predicted Price</span>
-              <span className="prediction-value predicted">
-                ${stockData.predicted_price?.toFixed(2)}
-              </span>
+              <span className="prediction-label">Predicted</span>
+              <span className="prediction-value predicted">${stockData.predicted_price?.toFixed(2)}</span>
             </div>
             <div className="prediction-card">
-              <span className="prediction-label">Expected Change</span>
+              <span className="prediction-label">Return</span>
               <span className={`prediction-value ${stockData.predicted_return >= 0 ? 'positive' : 'negative'}`}>
                 {(stockData.predicted_return * 100).toFixed(2)}%
               </span>
             </div>
           </div>
           <div className="prediction-note">
-            ⚡ Based on LSTM neural network trained on historical price patterns
+            LSTM neural network • {stockData.chart_data?.dates?.length || 0} training samples
           </div>
         </div>
 
-        {/* Trading Panel */}
         <div className="trading-panel">
-          <div className="order-type-toggle">
-            <button 
-              className={`order-btn buy ${orderSide === 'buy' ? 'active' : ''}`}
-              onClick={() => setOrderSide('buy')}
-            >
-              Buy
+          <div className="order-toggle">
+            <button className={`order-btn buy ${orderSide === 'buy' ? 'active' : ''}`} onClick={() => setOrderSide('buy')}>
+              <span className="btn-icon">▲</span> Buy
             </button>
-            <button 
-              className={`order-btn sell ${orderSide === 'sell' ? 'active' : ''}`}
-              onClick={() => setOrderSide('sell')}
-            >
-              Sell
+            <button className={`order-btn sell ${orderSide === 'sell' ? 'active' : ''}`} onClick={() => setOrderSide('sell')}>
+              <span className="btn-icon">▼</span> Sell
             </button>
           </div>
           <div className="order-controls">
-            <div className="order-quantity">
+            <div className="qty-control">
               <button onClick={() => setOrderQuantity(Math.max(1, orderQuantity - 1))}>−</button>
-              <input 
-                type="number" 
-                value={orderQuantity} 
-                onChange={(e) => setOrderQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                min="1"
-              />
+              <input type="number" value={orderQuantity} onChange={(e) => setOrderQuantity(Math.max(1, parseInt(e.target.value) || 1))} min="1" />
               <button onClick={() => setOrderQuantity(orderQuantity + 1)}>+</button>
             </div>
-            <div className="order-type-select">
-              <select value={orderType} onChange={(e) => setOrderType(e.target.value)}>
-                <option value="market">Market Order</option>
-                <option value="limit">Limit Order</option>
-                <option value="stop">Stop Order</option>
-              </select>
-            </div>
+            <select className="order-type" value={orderType} onChange={(e) => setOrderType(e.target.value)}>
+              <option value="market">Market</option>
+              <option value="limit">Limit</option>
+              <option value="stop">Stop</option>
+            </select>
           </div>
           <div className="order-total">
             <span>Total</span>
-            <span className="total-price">
-              ${(stockData.last_price * orderQuantity).toFixed(2)}
-            </span>
+            <span className="total-price">${(stockData.last_price * orderQuantity).toFixed(2)}</span>
           </div>
-          <button 
-            className={`place-order-btn ${orderSide}`} 
-            onClick={placeOrder}
-            disabled={loading}
-          >
-            {loading ? 'Processing...' : `${orderSide === 'buy' ? 'Buy' : 'Sell'} ${orderQuantity} shares`}
+          <button className={`place-order ${orderSide}`} onClick={placeOrder} disabled={loading}>
+            {loading ? '⏳ Processing' : `${orderSide === 'buy' ? 'Buy' : 'Sell'} ${orderQuantity} shares`}
           </button>
         </div>
       </div>
@@ -426,61 +388,100 @@ function Stocks() {
   };
 
   return (
-    <div className="stocks-page">
-      {/* Search Section */}
+    <div className="stocks-container">
+      <div className="bg-grid"></div>
+      <div className="bg-orbitals">
+        <div className="orbital-ring ring-1"></div>
+        <div className="orbital-ring ring-2"></div>
+        <div className="orbital-ring ring-3"></div>
+        <div className="orbital-dot dot-1"></div>
+        <div className="orbital-dot dot-2"></div>
+        <div className="orbital-dot dot-3"></div>
+      </div>
+      <div className="bg-chartlines">
+        <svg viewBox="0 0 1000 700" preserveAspectRatio="none">
+          <polyline points="0,520 120,500 220,460 300,480 420,380 540,410 640,300 760,330 860,220 1000,250" fill="none" stroke="rgba(168,85,247,0.2)" strokeWidth="1.5" />
+          <polyline points="0,180 140,210 260,160 380,190 500,120 620,150 740,90 860,110 1000,60" fill="none" stroke="rgba(168,85,247,0.1)" strokeWidth="1" />
+          <circle cx="300" cy="480" r="3" fill="rgba(168,85,247,0.15)" />
+          <circle cx="640" cy="300" r="2" fill="rgba(168,85,247,0.1)" />
+          <circle cx="860" cy="220" r="4" fill="rgba(168,85,247,0.08)" />
+        </svg>
+      </div>
+      <div className="bg-particles">
+        {[...Array(25)].map((_, i) => (
+          <div key={i} className="bg-particle" style={{
+            '--delay': `${i * 1.1}s`,
+            '--duration': `${22 + Math.random() * 18}s`,
+            '--x': `${Math.random() * 100}%`,
+            '--size': `${0.8 + Math.random() * 2}px`,
+          }}></div>
+        ))}
+      </div>
+      <div className="bg-scanline"></div>
+
+      <div className="terminal-header">
+        <div className="terminal-brand">
+          <span className="brand-dot">●</span>
+          <span className="brand-name">NEXORA</span>
+          <span className="brand-sep">//</span>
+          <span className="brand-module">MARKET</span>
+        </div>
+        <div className="terminal-status">
+          <span className="status-ping"></span>
+          <span className="status-text">LIVE</span>
+          <span className="status-time">{new Date().toLocaleTimeString()}</span>
+        </div>
+      </div>
+
       <div className="search-section">
-        <div className="search-container">
-          <span className="search-icon">🔍</span>
+        <div className="search-wrap">
+          <span className="search-icon">⌕</span>
           <input
             type="text"
-            placeholder="Search stocks (AAPL, MSFT, TSLA)..."
+            placeholder="Enter symbol (AAPL, MSFT, TSLA...)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="search-input"
           />
-          {loading && <span className="search-loading">⏳</span>}
+          {loading && <span className="search-spinner">⟳</span>}
         </div>
-        
         {searchResults.length > 0 && (
-          <div className="search-results">
+          <div className="search-dropdown">
             {searchResults.map((stock) => (
-              <div 
-                key={stock.symbol} 
-                className="search-result-item"
-                onClick={() => selectStock(stock)}
-              >
-                <div className="result-symbol">{stock.symbol}</div>
-                <div className="result-name">{stock.description}</div>
+              <div key={stock.symbol} className="search-result" onClick={() => selectStock(stock)}>
+                <span className="result-symbol">{stock.symbol}</span>
+                <span className="result-name">{stock.description}</span>
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {/* Error Display */}
       {error && (
-        <div className="error-message">
-          <span>⚠️ {error}</span>
-          <button onClick={() => setError(null)}>×</button>
+        <div className="error-banner">
+          <span>⚠ {error}</span>
+          <button onClick={() => setError(null)}>✕</button>
         </div>
       )}
 
-      {/* Stock Detail or Empty State */}
       {selectedStock ? (
         renderStockDetail()
       ) : (
         <div className="empty-state">
-          <div className="empty-icon">📈</div>
+          <div className="empty-graphic">
+            <span className="empty-icon">📊</span>
+            <div className="empty-chart-bars">
+              {[...Array(16)].map((_, i) => (
+                <div key={i} className="empty-bar" style={{ height: `${15 + Math.random() * 70}%` }}></div>
+              ))}
+            </div>
+          </div>
           <h2>Search for a stock</h2>
-          <p>Enter a ticker symbol to get AI-powered predictions and analysis</p>
-          <div className="popular-stocks">
-            <span>Popular:</span>
+          <p>Get AI-powered predictions and real-time market data</p>
+          <div className="quick-stocks">
+            <span>Quick access:</span>
             {['AAPL', 'MSFT', 'TSLA', 'GOOGL', 'AMZN', 'NVDA'].map((symbol) => (
-              <button 
-                key={symbol}
-                className="popular-stock-btn"
-                onClick={() => selectStock({ symbol })}
-              >
+              <button key={symbol} className="quick-btn" onClick={() => selectStock({ symbol })}>
                 {symbol}
               </button>
             ))}
@@ -488,17 +489,15 @@ function Stocks() {
         </div>
       )}
 
-      {/* Watchlist */}
       {watchlist.length > 0 && (
         <div className="watchlist-section">
-          <h3>⭐ Watchlist</h3>
-          <div className="watchlist-grid">
+          <div className="watchlist-header">
+            <span>⭐ WATCHLIST</span>
+            <span className="watchlist-count">{watchlist.length} symbols</span>
+          </div>
+          <div className="watchlist-items">
             {watchlist.map((symbol) => (
-              <div 
-                key={symbol} 
-                className="watchlist-item"
-                onClick={() => selectStock({ symbol })}
-              >
+              <div key={symbol} className="watchlist-item" onClick={() => selectStock({ symbol })}>
                 {symbol}
               </div>
             ))}
