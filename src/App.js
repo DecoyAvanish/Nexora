@@ -4,6 +4,7 @@ import Header from './Header';
 import Feed from './Feed';
 import Stats from './Stats';
 import Stocks from './Stocks';
+import Cash from './Cash';
 import Login from './Login';
 import SignUp from './SignUp';
 import Account from './Account';
@@ -114,22 +115,24 @@ function App() {
       );
     }
 
-    if (currentPage === 'stocks') {
-      return <Stocks />;
+    switch(currentPage) {
+      case 'stocks':
+        return <Stocks />;
+      case 'cash':
+        return <Cash />;
+      case 'account':
+        return <Account user={user} onLogout={handleLogout} />;
+      case 'portfolio':
+      default:
+        return (
+          <div className="body">
+            <div className="info">
+              <Feed />
+              <Stats />
+            </div>
+          </div>
+        );
     }
-    
-    if (currentPage === 'account') {
-      return <Account user={user} onLogout={handleLogout} />;
-    }
-
-    return (
-      <div className="body">
-        <div className="info">
-          <Feed />
-          <Stats />
-        </div>
-      </div>
-    );
   };
 
   if (loading) {

@@ -1,0 +1,821 @@
+.cash-page {
+  flex: 0.7;
+  color: #f0edff;
+  animation: fadeIn 0.6s ease;
+  padding: 20px;
+  overflow-y: auto;
+  max-height: calc(100vh - 80px);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cash-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.cash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(168, 85, 247, 0.06);
+}
+
+.cash-header h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f0edff 0%, rgba(240, 237, 255, 0.6) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.currency-selector select {
+  background: rgba(10, 12, 20, 0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(168, 85, 247, 0.08);
+  color: #f0edff;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.currency-selector select:hover {
+  border-color: rgba(168, 85, 247, 0.2);
+}
+
+.currency-selector select:focus {
+  outline: none;
+  border-color: #A855F7;
+}
+
+.balance-overview {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.balance-card {
+  background: rgba(10, 12, 20, 0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(168, 85, 247, 0.06);
+  border-radius: 16px;
+  padding: 20px 24px;
+  transition: all 0.3s ease;
+}
+
+.balance-card:hover {
+  border-color: rgba(168, 85, 247, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+.balance-card.total {
+  background: linear-gradient(145deg, rgba(168, 85, 247, 0.08), rgba(10, 12, 20, 0.6));
+  border-color: rgba(168, 85, 247, 0.12);
+}
+
+.balance-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: rgba(240, 237, 255, 0.4);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.balance-amount {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #f0edff;
+  margin-bottom: 4px;
+}
+
+.balance-change {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.balance-change.positive {
+  color: #4bff9b;
+}
+
+.balance-change.neutral {
+  color: rgba(240, 237, 255, 0.3);
+}
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: rgba(10, 12, 20, 0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(168, 85, 247, 0.06);
+  border-radius: 12px;
+  color: rgba(240, 237, 255, 0.7);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+  border-color: rgba(168, 85, 247, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.action-btn.deposit {
+  background: linear-gradient(135deg, rgba(75, 255, 155, 0.08), rgba(10, 12, 20, 0.6));
+  border-color: rgba(75, 255, 155, 0.1);
+  color: #4bff9b;
+}
+
+.action-btn.deposit:hover {
+  border-color: rgba(75, 255, 155, 0.2);
+  box-shadow: 0 8px 30px rgba(75, 255, 155, 0.05);
+}
+
+.action-btn.withdraw {
+  background: linear-gradient(135deg, rgba(255, 107, 94, 0.08), rgba(10, 12, 20, 0.6));
+  border-color: rgba(255, 107, 94, 0.1);
+  color: #ff6b5e;
+}
+
+.action-btn.withdraw:hover {
+  border-color: rgba(255, 107, 94, 0.2);
+  box-shadow: 0 8px 30px rgba(255, 107, 94, 0.05);
+}
+
+.action-btn.transfer {
+  background: linear-gradient(135deg, rgba(100, 149, 237, 0.08), rgba(10, 12, 20, 0.6));
+  border-color: rgba(100, 149, 237, 0.1);
+  color: #6495ed;
+}
+
+.action-btn.history {
+  background: linear-gradient(135deg, rgba(240, 180, 0, 0.08), rgba(10, 12, 20, 0.6));
+  border-color: rgba(240, 180, 0, 0.1);
+  color: #f0b400;
+}
+
+.action-btn svg {
+  flex-shrink: 0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+
+.section-header h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #f0edff;
+  background: linear-gradient(135deg, #f0edff 0%, rgba(240, 237, 255, 0.5) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.add-method-btn {
+  background: rgba(168, 85, 247, 0.06);
+  border: 1px solid rgba(168, 85, 247, 0.08);
+  color: #A855F7;
+  padding: 6px 16px;
+  border-radius: 12px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.add-method-btn:hover {
+  background: rgba(168, 85, 247, 0.12);
+  border-color: rgba(168, 85, 247, 0.15);
+}
+
+.filter-select {
+  background: rgba(10, 12, 20, 0.6);
+  border: 1px solid rgba(168, 85, 247, 0.06);
+  color: rgba(240, 237, 255, 0.6);
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: rgba(168, 85, 247, 0.15);
+}
+
+.payment-section {
+  margin-bottom: 30px;
+}
+
+.payment-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.payment-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: rgba(10, 12, 20, 0.4);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(168, 85, 247, 0.04);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.payment-card:hover {
+  border-color: rgba(168, 85, 247, 0.08);
+  background: rgba(10, 12, 20, 0.6);
+}
+
+.payment-card.default {
+  border-color: rgba(168, 85, 247, 0.1);
+  background: rgba(168, 85, 247, 0.04);
+}
+
+.payment-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.payment-icon {
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(168, 85, 247, 0.04);
+  border-radius: 10px;
+}
+
+.payment-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.payment-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #f0edff;
+}
+
+.payment-type {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: rgba(240, 237, 255, 0.3);
+}
+
+.payment-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.default-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 2px 10px;
+  border-radius: 20px;
+  background: rgba(75, 255, 155, 0.06);
+  color: #4bff9b;
+  border: 1px solid rgba(75, 255, 155, 0.08);
+}
+
+.payment-action-btn {
+  background: transparent;
+  border: none;
+  color: rgba(240, 237, 255, 0.2);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.payment-action-btn:hover {
+  color: #A855F7;
+  background: rgba(168, 85, 247, 0.04);
+}
+
+.transaction-section {
+  margin-bottom: 30px;
+}
+
+.transaction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.transaction-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  background: rgba(10, 12, 20, 0.3);
+  border: 1px solid rgba(168, 85, 247, 0.03);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.transaction-item:hover {
+  background: rgba(10, 12, 20, 0.5);
+  border-color: rgba(168, 85, 247, 0.06);
+}
+
+.transaction-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.transaction-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.transaction-icon.type-deposit {
+  background: rgba(75, 255, 155, 0.06);
+  color: #4bff9b;
+}
+
+.transaction-icon.type-withdraw {
+  background: rgba(255, 107, 94, 0.06);
+  color: #ff6b5e;
+}
+
+.transaction-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.transaction-type {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #f0edff;
+}
+
+.transaction-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: rgba(240, 237, 255, 0.2);
+}
+
+.transaction-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.transaction-amount {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.transaction-amount.type-deposit {
+  color: #4bff9b;
+}
+
+.transaction-amount.type-withdraw {
+  color: #ff6b5e;
+}
+
+.transaction-status {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  padding: 2px 10px;
+  border-radius: 12px;
+}
+
+.transaction-status.status-completed {
+  background: rgba(75, 255, 155, 0.04);
+  color: #4bff9b;
+  border: 1px solid rgba(75, 255, 155, 0.04);
+}
+
+.transaction-status.status-pending {
+  background: rgba(240, 180, 0, 0.04);
+  color: #f0b400;
+  border: 1px solid rgba(240, 180, 0, 0.04);
+}
+
+.transaction-status.status-failed {
+  background: rgba(255, 107, 94, 0.04);
+  color: #ff6b5e;
+  border: 1px solid rgba(255, 107, 94, 0.04);
+}
+
+.settings-section {
+  margin-bottom: 30px;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.setting-item {
+  background: rgba(10, 12, 20, 0.3);
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(168, 85, 247, 0.03);
+  transition: all 0.3s ease;
+}
+
+.setting-item:hover {
+  border-color: rgba(168, 85, 247, 0.06);
+  background: rgba(10, 12, 20, 0.5);
+}
+
+.setting-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  color: rgba(240, 237, 255, 0.3);
+  margin-bottom: 8px;
+}
+
+.setting-value {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.setting-value select {
+  background: rgba(10, 12, 20, 0.6);
+  border: 1px solid rgba(168, 85, 247, 0.06);
+  color: #f0edff;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  flex: 1;
+  cursor: pointer;
+}
+
+.setting-value select:focus {
+  outline: none;
+  border-color: rgba(168, 85, 247, 0.15);
+}
+
+.setting-input {
+  background: rgba(10, 12, 20, 0.6);
+  border: 1px solid rgba(168, 85, 247, 0.06);
+  color: #f0edff;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  flex: 1;
+}
+
+.setting-input:focus {
+  outline: none;
+  border-color: rgba(168, 85, 247, 0.15);
+}
+
+.setting-input::placeholder {
+  color: rgba(240, 237, 255, 0.2);
+}
+
+.setting-description {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: rgba(240, 237, 255, 0.15);
+  white-space: nowrap;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(240, 237, 255, 0.05);
+  border-radius: 22px;
+  transition: 0.3s;
+  border: 1px solid rgba(168, 85, 247, 0.06);
+}
+
+.toggle-slider:before {
+  content: '';
+  position: absolute;
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: rgba(240, 237, 255, 0.2);
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: rgba(75, 255, 155, 0.15);
+  border-color: rgba(75, 255, 155, 0.15);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+  transform: translateX(18px);
+  background-color: #4bff9b;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  background: linear-gradient(145deg, rgba(10, 12, 20, 0.95), rgba(20, 15, 35, 0.9));
+  border: 1px solid rgba(168, 85, 247, 0.08);
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 480px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modal-header h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #f0edff;
+}
+
+.modal-close {
+  background: rgba(168, 85, 247, 0.04);
+  border: 1px solid rgba(168, 85, 247, 0.06);
+  color: rgba(240, 237, 255, 0.3);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  background: rgba(168, 85, 247, 0.08);
+  color: #f0edff;
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modal-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-input-group label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  color: rgba(240, 237, 255, 0.4);
+}
+
+.modal-input {
+  background: rgba(10, 12, 20, 0.6);
+  border: 1px solid rgba(168, 85, 247, 0.06);
+  color: #f0edff;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.modal-input:focus {
+  outline: none;
+  border-color: rgba(168, 85, 247, 0.15);
+}
+
+.modal-input::placeholder {
+  color: rgba(240, 237, 255, 0.15);
+}
+
+.modal-select {
+  background: rgba(10, 12, 20, 0.6);
+  border: 1px solid rgba(168, 85, 247, 0.06);
+  color: #f0edff;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.modal-select:focus {
+  outline: none;
+  border-color: rgba(168, 85, 247, 0.15);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.modal-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.modal-btn.cancel {
+  background: rgba(240, 237, 255, 0.04);
+  color: rgba(240, 237, 255, 0.4);
+  border: 1px solid rgba(240, 237, 255, 0.04);
+}
+
+.modal-btn.cancel:hover {
+  background: rgba(240, 237, 255, 0.08);
+}
+
+.modal-btn.confirm {
+  background: linear-gradient(135deg, #A855F7, #7c3aed);
+  color: #fff;
+}
+
+.modal-btn.confirm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(168, 85, 247, 0.3);
+}
+
+.modal-input-group small {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: rgba(240, 237, 255, 0.2);
+}
+
+@media (max-width: 1024px) {
+  .balance-overview {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .balance-overview {
+    grid-template-columns: 1fr;
+  }
+  
+  .quick-actions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .cash-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .cash-header h1 {
+    font-size: 22px;
+  }
+  
+  .transaction-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .transaction-right {
+    align-items: flex-start;
+    width: 100%;
+  }
+  
+  .modal-content {
+    padding: 24px;
+  }
+}
+
+.cash-page::-webkit-scrollbar {
+  width: 4px;
+}
+
+.cash-page::-webkit-scrollbar-track {
+  background: rgba(10, 12, 20, 0.3);
+}
+
+.cash-page::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.3);
+  border-radius: 4px;
+}
+
+.cash-page::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.5);
+}
