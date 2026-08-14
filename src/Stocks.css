@@ -41,12 +41,21 @@ body {
 @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
 @keyframes orbitRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @keyframes orbitRotateReverse { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
-@keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
 @keyframes driftParticle {
-  0% { transform: translateY(0) translateX(0); opacity: 0; }
-  10% { opacity: 0.6; }
-  90% { opacity: 0.6; }
-  100% { transform: translateY(-90vh) translateX(40px); opacity: 0; }
+  0% { 
+    transform: translateY(0) translateX(0); 
+    opacity: 0;
+  }
+  5% { 
+    opacity: 0.6;
+  }
+  90% { 
+    opacity: 0.6;
+  }
+  100% { 
+    transform: translateY(-110vh) translateX(40px); 
+    opacity: 0;
+  }
 }
 @keyframes scanSweep {
   0% { transform: translateY(-10%); opacity: 0; }
@@ -58,10 +67,6 @@ body {
 @keyframes waveform {
   0%, 100% { transform: scaleY(0.3); }
   50% { transform: scaleY(1); }
-}
-@keyframes ringPulse {
-  0%, 100% { opacity: 0.15; transform: scale(1); }
-  50% { opacity: 0.3; transform: scale(1.05); }
 }
 
 .bg-grid {
@@ -172,17 +177,19 @@ body {
   z-index: 0;
   overflow: hidden;
 }
+
 .bg-particle {
   position: absolute;
-  bottom: 0;
   border-radius: 50%;
   background: var(--purple);
   box-shadow: 0 0 6px var(--purple-dim);
   width: var(--size);
   height: var(--size);
   left: var(--x);
+  top: var(--start-y, 100%);
   animation: driftParticle var(--duration) linear infinite;
   animation-delay: var(--delay);
+  opacity: 0;
 }
 
 .bg-scanline {
@@ -607,7 +614,6 @@ body {
   letter-spacing: 1px;
 }
 
-/* ===== TRADING ===== */
 .trading-panel {
   background: rgba(255, 255, 255, 0.015);
   border: 1px solid var(--border-hair);

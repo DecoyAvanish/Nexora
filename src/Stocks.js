@@ -387,6 +387,15 @@ function Stocks() {
     );
   };
 
+  const particles = Array.from({ length: 25 }, (_, i) => ({
+    id: i,
+    delay: i * 1.1,
+    duration: 22 + Math.random() * 18,
+    x: Math.random() * 100,
+    size: 0.8 + Math.random() * 2,
+    startY: 20 + Math.random() * 80
+  }));
+
   return (
     <div className="stocks-container">
       <div className="bg-grid"></div>
@@ -408,12 +417,13 @@ function Stocks() {
         </svg>
       </div>
       <div className="bg-particles">
-        {[...Array(25)].map((_, i) => (
-          <div key={i} className="bg-particle" style={{
-            '--delay': `${i * 1.1}s`,
-            '--duration': `${22 + Math.random() * 18}s`,
-            '--x': `${Math.random() * 100}%`,
-            '--size': `${0.8 + Math.random() * 2}px`,
+        {particles.map((p) => (
+          <div key={p.id} className="bg-particle" style={{
+            '--delay': `${p.delay}s`,
+            '--duration': `${p.duration}s`,
+            '--x': `${p.x}%`,
+            '--size': `${p.size}px`,
+            '--start-y': `${p.startY}%`,
           }}></div>
         ))}
       </div>
