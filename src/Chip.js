@@ -3,11 +3,11 @@ import './Chip.css'
 
 function Chip({ label, icon }) {
     return (
-        <div className = "chip">
-            <div className = "avatar">
+        <div className="chip">
+            <div className="avatar">
                 {icon}
             </div>
-            <div className = "label">   
+            <div className="label">   
                 <span>{label}</span>
             </div>
         </div>

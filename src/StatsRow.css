@@ -1,41 +1,57 @@
 .row {
-    display: flex;
-    justify-content: space-between;
-    height: 60px;
-    align-items: center;
-    padding: 0 24px;
-    cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 60px;
+  padding: 0 20px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border-bottom: 1px solid rgba(168, 85, 247, 0.02);
 }
 
 .row:hover {
-    background-color: #31363A;
+  background: rgba(168, 85, 247, 0.04);
+  border-color: rgba(168, 85, 247, 0.06);
 }
 
-.row .chart{
-    padding: 0 10px;
+.row .chart {
+  padding: 0 10px;
+  opacity: 0.3;
 }
 
 .intro h1 {
-    font-size: 16px;
-    font-weight: bold;
-    padding-bottom: 2px;
-    text-align: left;
+  font-size: 15px;
+  font-weight: 600;
+  padding-bottom: 2px;
+  text-align: left;
+  color: #f0edff;
+  font-family: 'Space Grotesk', sans-serif;
 }
 
 .intro p {
-    font-size: 12px;
+  font-size: 11px;
+  color: rgba(240, 237, 255, 0.3);
+  font-family: 'IBM Plex Mono', monospace;
 }
 
 .num {
-    text-align: right;
-    font-size: 12px;
-    font-weight: 500;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .price {
-    padding-bottom: 4px;
+  padding-bottom: 4px;
+  color: rgba(240, 237, 255, 0.8);
+  font-family: 'IBM Plex Mono', monospace;
 }
 
 .per {
-    color: #5AC53B;
+  color: #A855F7;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+}
+
+.per.negative {
+  color: #ff6b5e;
 }

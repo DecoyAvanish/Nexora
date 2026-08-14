@@ -20,10 +20,12 @@ function Header({ onNavigate, currentPage, user, onLogout }) {
     <div className="wrapper">
       <div className="logo" onClick={() => onNavigate && onNavigate('portfolio')}>
         <img src={Logo} width={25} alt="Nexora" />
+        <span>NEXORA</span>
       </div>
       <div className="searchbar">
         <div className="searchcontainer">
-          <input placeholder="Search" type="text" />
+          <span className="search-icon">⌕</span>
+          <input placeholder="Search assets..." type="text" />
         </div>
       </div>
       <div className="menu">

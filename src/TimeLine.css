@@ -1,24 +1,31 @@
 .timelinecontainer {
-    display: flex;
-    border-bottom: 1px solid #3B4754;
+  display: flex;
+  border-bottom: 1px solid rgba(168, 85, 247, 0.04);
+  padding-top: 8px;
 }
 
 .buttonscontainer {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .button {
-    font-weight: bold;
-    padding: 10px 10px 20px 10px;
-    cursor: pointer;
+  font-weight: 600;
+  padding: 8px 14px 14px;
+  cursor: pointer;
+  font-size: 12px;
+  color: rgba(240, 237, 255, 0.2);
+  font-family: 'IBM Plex Mono', monospace;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
 }
 
 .button:hover {
-    color: #5AC53B;
+  color: rgba(240, 237, 255, 0.5);
 }
 
 .button.active {
-    color: #5AC53B;
-    border-bottom: 2px solid #5AC53B;
+  color: #A855F7;
+  border-bottom: 2px solid #A855F7;
 }

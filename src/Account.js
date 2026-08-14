@@ -119,8 +119,6 @@ function Account({ user, onLogout }) {
 
   return (
     <div className="account-container">
-      {/* Layered ambient background — grid, faint chart geometry,
-          drifting data points, and a slow vertical scan sweep */}
       <div className="bg-grid"></div>
       <div className="bg-chartlines">
         <svg viewBox="0 0 1000 700" preserveAspectRatio="none">
@@ -151,13 +149,11 @@ function Account({ user, onLogout }) {
       </div>
       <div className="bg-scanline"></div>
 
-      {/* Mouse follower glow */}
       <div className="cursor-glow" style={{
         left: mousePosition.x,
         top: mousePosition.y
       }}></div>
 
-      {/* Header */}
       <div className="account-header">
         <div className="header-main">
           <div className="header-label">
@@ -181,7 +177,6 @@ function Account({ user, onLogout }) {
         </div>
       </div>
 
-      {/* Profile identity module */}
       <div className="identity-module" onMouseMove={handleIdentityMove}>
         <div className="identity-ring">
           <div className="identity-avatar">
@@ -208,7 +203,6 @@ function Account({ user, onLogout }) {
         </button>
       </div>
 
-      {/* Edit form */}
       {editMode && (
         <div className="edit-module">
           <form onSubmit={handleUpdateProfile} className="edit-form">
@@ -241,7 +235,6 @@ function Account({ user, onLogout }) {
         </div>
       )}
 
-      {/* Financial telemetry — one connected system, not four loose cards */}
       <div className="telemetry-system">
         <div className="telemetry-rail">TELEMETRY // LIVE</div>
         <div className="telemetry-grid">
@@ -299,7 +292,6 @@ function Account({ user, onLogout }) {
         </div>
       </div>
 
-      {/* Security command center */}
       <div className="security-module">
         <div className="security-header">
           <div className="security-title">
@@ -344,7 +336,6 @@ function Account({ user, onLogout }) {
         </div>
       </div>
 
-      {/* Terminate session */}
       <div className="terminate-module">
         <button className="terminate-btn" onClick={handleLogout}>
           <span className="terminate-icon">⏻</span>
