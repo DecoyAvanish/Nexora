@@ -1,15 +1,67 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import './Cash.css'
 
+const currencies = [
+  { code: 'USD', symbol: '$', name: 'US Dollar', rate: 1 },
+  { code: 'EUR', symbol: '€', name: 'Euro', rate: 0.92 },
+  { code: 'GBP', symbol: '£', name: 'British Pound', rate: 0.79 },
+  { code: 'JPY', symbol: '¥', name: 'Japanese Yen', rate: 149.50 },
+  { code: 'AUD', symbol: 'A$', name: 'Australian Dollar', rate: 1.54 },
+  { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar', rate: 1.37 },
+  { code: 'CHF', symbol: 'Fr', name: 'Swiss Franc', rate: 0.88 },
+  { code: 'CNY', symbol: '¥', name: 'Chinese Yuan', rate: 7.18 },
+  { code: 'HKD', symbol: 'HK$', name: 'Hong Kong Dollar', rate: 7.81 },
+  { code: 'NZD', symbol: 'NZ$', name: 'New Zealand Dollar', rate: 1.68 },
+  { code: 'SEK', symbol: 'kr', name: 'Swedish Krona', rate: 10.82 },
+  { code: 'KRW', symbol: '₩', name: 'South Korean Won', rate: 1375.00 },
+  { code: 'SGD', symbol: 'S$', name: 'Singapore Dollar', rate: 1.36 },
+  { code: 'NOK', symbol: 'kr', name: 'Norwegian Krone', rate: 10.95 },
+  { code: 'MXN', symbol: 'Mex$', name: 'Mexican Peso', rate: 16.75 },
+  { code: 'INR', symbol: '₹', name: 'Indian Rupee', rate: 83.50 },
+  { code: 'RUB', symbol: '₽', name: 'Russian Ruble', rate: 92.30 },
+  { code: 'ZAR', symbol: 'R', name: 'South African Rand', rate: 18.90 },
+  { code: 'BRL', symbol: 'R$', name: 'Brazilian Real', rate: 5.05 },
+  { code: 'TRY', symbol: '₺', name: 'Turkish Lira', rate: 32.80 },
+  { code: 'AED', symbol: 'د.إ', name: 'UAE Dirham', rate: 3.67 },
+  { code: 'SAR', symbol: '﷼', name: 'Saudi Riyal', rate: 3.75 },
+  { code: 'PLN', symbol: 'zł', name: 'Polish Zloty', rate: 4.12 },
+  { code: 'THB', symbol: '฿', name: 'Thai Baht', rate: 36.80 },
+  { code: 'MYR', symbol: 'RM', name: 'Malaysian Ringgit', rate: 4.75 },
+  { code: 'PHP', symbol: '₱', name: 'Philippine Peso', rate: 57.50 },
+  { code: 'IDR', symbol: 'Rp', name: 'Indonesian Rupiah', rate: 16050 },
+  { code: 'VND', symbol: '₫', name: 'Vietnamese Dong', rate: 25450 },
+  { code: 'EGP', symbol: 'E£', name: 'Egyptian Pound', rate: 48.20 },
+  { code: 'NGN', symbol: '₦', name: 'Nigerian Naira', rate: 1580 },
+  { code: 'PKR', symbol: 'Rs', name: 'Pakistani Rupee', rate: 278.50 },
+  { code: 'BDT', symbol: '৳', name: 'Bangladeshi Taka', rate: 117.50 },
+  { code: 'KWD', symbol: 'KD', name: 'Kuwaiti Dinar', rate: 0.31 },
+  { code: 'BHD', symbol: '.د.ب', name: 'Bahraini Dinar', rate: 0.38 },
+  { code: 'OMR', symbol: '﷼', name: 'Omani Rial', rate: 0.38 },
+  { code: 'QAR', symbol: '﷼', name: 'Qatari Riyal', rate: 3.64 },
+  { code: 'DKK', symbol: 'kr', name: 'Danish Krone', rate: 6.94 },
+  { code: 'HUF', symbol: 'Ft', name: 'Hungarian Forint', rate: 365 },
+  { code: 'CZK', symbol: 'Kč', name: 'Czech Koruna', rate: 23.40 },
+  { code: 'ILS', symbol: '₪', name: 'Israeli Shekel', rate: 3.72 },
+  { code: 'CLP', symbol: '$', name: 'Chilean Peso', rate: 970 },
+  { code: 'COP', symbol: '$', name: 'Colombian Peso', rate: 3950 },
+  { code: 'PEN', symbol: 'S/', name: 'Peruvian Sol', rate: 3.82 },
+  { code: 'ARS', symbol: '$', name: 'Argentine Peso', rate: 880 },
+]
+
 const Cash = () => {
-  const [balance, setBalance] = useState(114656.00)
-  const [buyingPower, setBuyingPower] = useState(4110.00)
-  const [cashAvailable, setCashAvailable] = useState(2850.50)
+  const [baseBalance] = useState(114656.00)
+  const [baseBuyingPower] = useState(4110.00)
+  const [baseCashAvailable] = useState(2850.50)
   const [withdrawAmount, setWithdrawAmount] = useState('')
   const [depositAmount, setDepositAmount] = useState('')
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('bank')
   const [showDepositModal, setShowDepositModal] = useState(false)
   const [showWithdrawModal, setShowWithdrawModal] = useState(false)
+  const [selectedCurrency, setSelectedCurrency] = useState(() => {
+    const saved = localStorage.getItem('preferredCurrency')
+    return saved || 'USD'
+  })
+  
   const [transactionHistory, setTransactionHistory] = useState([
     { id: 1, type: 'deposit', amount: 5000, date: '2026-08-10', status: 'completed', method: 'Bank Transfer' },
     { id: 2, type: 'withdraw', amount: 2000, date: '2026-08-08', status: 'completed', method: 'Bank Transfer' },
@@ -24,8 +76,41 @@ const Cash = () => {
     { id: 3, type: 'Wire Transfer', name: 'Wells Fargo', last4: '6781', default: false },
   ])
 
-  const [currency, setCurrency] = useState('USD')
   const [defaultPayment, setDefaultPayment] = useState(1)
+
+  const currentCurrency = currencies.find(c => c.code === selectedCurrency) || currencies[0]
+  const exchangeRate = currentCurrency.rate
+
+  const convertAmount = (amount) => {
+    return amount * exchangeRate
+  }
+
+  const formatCurrency = (amount) => {
+    const converted = convertAmount(amount)
+    const symbol = currentCurrency.symbol
+    
+    if (selectedCurrency === 'JPY' || selectedCurrency === 'KRW' || selectedCurrency === 'IDR' || selectedCurrency === 'VND') {
+      return `${symbol}${Math.round(converted).toLocaleString()}`
+    }
+    
+    if (selectedCurrency === 'KWD' || selectedCurrency === 'BHD' || selectedCurrency === 'OMR') {
+      return `${symbol}${converted.toFixed(3)}`
+    }
+    
+    return `${symbol}${converted.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+  }
+
+  const formatAmount = (amount, showSymbol = true) => {
+    if (showSymbol) {
+      return formatCurrency(amount)
+    }
+    const converted = convertAmount(amount)
+    return converted.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  }
+
+  useEffect(() => {
+    localStorage.setItem('preferredCurrency', selectedCurrency)
+  }, [selectedCurrency])
 
   const handleDeposit = () => {
     const amount = parseFloat(depositAmount)
@@ -33,14 +118,13 @@ const Cash = () => {
       const newTransaction = {
         id: transactionHistory.length + 1,
         type: 'deposit',
-        amount: amount,
+        amount: amount / exchangeRate,
         date: new Date().toISOString().split('T')[0],
         status: 'pending',
         method: selectedPaymentMethod === 'bank' ? 'Bank Transfer' : 
                 selectedPaymentMethod === 'card' ? 'Credit Card' : 'Wire Transfer'
       }
       setTransactionHistory([newTransaction, ...transactionHistory])
-      setCashAvailable(cashAvailable + amount)
       setDepositAmount('')
       setShowDepositModal(false)
     }
@@ -48,24 +132,24 @@ const Cash = () => {
 
   const handleWithdraw = () => {
     const amount = parseFloat(withdrawAmount)
-    if (amount > 0 && amount <= cashAvailable) {
+    const convertedAmount = amount / exchangeRate
+    if (amount > 0 && convertedAmount <= baseCashAvailable) {
       const newTransaction = {
         id: transactionHistory.length + 1,
         type: 'withdraw',
-        amount: amount,
+        amount: convertedAmount,
         date: new Date().toISOString().split('T')[0],
         status: 'pending',
         method: 'Bank Transfer'
       }
       setTransactionHistory([newTransaction, ...transactionHistory])
-      setCashAvailable(cashAvailable - amount)
       setWithdrawAmount('')
       setShowWithdrawModal(false)
     }
   }
 
   const getTotalAssets = () => {
-    return balance + buyingPower + cashAvailable
+    return baseBalance + baseBuyingPower + baseCashAvailable
   }
 
   const getStatusColor = (status) => {
@@ -88,11 +172,16 @@ const Cash = () => {
           <h1>Cash Management</h1>
           <div className="cash-header-actions">
             <span className="currency-selector">
-              <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
-                <option value="USD">USD $</option>
-                <option value="EUR">EUR €</option>
-                <option value="GBP">GBP £</option>
-                <option value="JPY">JPY ¥</option>
+              <select 
+                value={selectedCurrency} 
+                onChange={(e) => setSelectedCurrency(e.target.value)}
+                className="currency-select"
+              >
+                {currencies.map(currency => (
+                  <option key={currency.code} value={currency.code}>
+                    {currency.code} - {currency.name} ({currency.symbol})
+                  </option>
+                ))}
               </select>
             </span>
           </div>
@@ -101,22 +190,22 @@ const Cash = () => {
         <div className="balance-overview">
           <div className="balance-card total">
             <div className="balance-label">Total Assets</div>
-            <div className="balance-amount">${getTotalAssets().toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+            <div className="balance-amount">{formatCurrency(getTotalAssets())}</div>
             <div className="balance-change positive">+12.4% this month</div>
           </div>
           <div className="balance-card">
             <div className="balance-label">Portfolio Value</div>
-            <div className="balance-amount">${balance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-            <div className="balance-change positive">+$44.63 today</div>
+            <div className="balance-amount">{formatCurrency(baseBalance)}</div>
+            <div className="balance-change positive">+{formatCurrency(44.63)} today</div>
           </div>
           <div className="balance-card">
             <div className="balance-label">Buying Power</div>
-            <div className="balance-amount">${buyingPower.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+            <div className="balance-amount">{formatCurrency(baseBuyingPower)}</div>
             <div className="balance-change neutral">Available to trade</div>
           </div>
           <div className="balance-card">
             <div className="balance-label">Cash Available</div>
-            <div className="balance-amount">${cashAvailable.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+            <div className="balance-amount">{formatCurrency(baseCashAvailable)}</div>
             <div className="balance-change neutral">Ready to withdraw</div>
           </div>
         </div>
@@ -215,7 +304,7 @@ const Cash = () => {
                 </div>
                 <div className="transaction-right">
                   <div className={`transaction-amount ${getTypeColor(transaction.type)}`}>
-                    {transaction.type === 'deposit' ? '+' : '-'}${transaction.amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                    {transaction.type === 'deposit' ? '+' : '-'}{formatCurrency(transaction.amount)}
                   </div>
                   <div className={`transaction-status ${getStatusColor(transaction.status)}`}>
                     {transaction.status}
@@ -234,11 +323,16 @@ const Cash = () => {
             <div className="setting-item">
               <div className="setting-label">Default Currency</div>
               <div className="setting-value">
-                <select value={currency} onChange={(e) => setCurrency(e.target.value)}>
-                  <option value="USD">United States Dollar (USD)</option>
-                  <option value="EUR">Euro (EUR)</option>
-                  <option value="GBP">British Pound (GBP)</option>
-                  <option value="JPY">Japanese Yen (JPY)</option>
+                <select 
+                  value={selectedCurrency} 
+                  onChange={(e) => setSelectedCurrency(e.target.value)}
+                  className="setting-select"
+                >
+                  {currencies.map(currency => (
+                    <option key={currency.code} value={currency.code}>
+                      {currency.code} - {currency.name} ({currency.symbol})
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -278,12 +372,12 @@ const Cash = () => {
               </div>
               <div className="modal-body">
                 <div className="modal-input-group">
-                  <label>Amount (USD)</label>
+                  <label>Amount ({currentCurrency.code})</label>
                   <input 
                     type="number" 
                     value={depositAmount}
                     onChange={(e) => setDepositAmount(e.target.value)}
-                    placeholder="0.00"
+                    placeholder={`0.00 ${currentCurrency.code}`}
                     className="modal-input"
                   />
                 </div>
@@ -317,15 +411,15 @@ const Cash = () => {
               </div>
               <div className="modal-body">
                 <div className="modal-input-group">
-                  <label>Amount (USD)</label>
+                  <label>Amount ({currentCurrency.code})</label>
                   <input 
                     type="number" 
                     value={withdrawAmount}
                     onChange={(e) => setWithdrawAmount(e.target.value)}
-                    placeholder="0.00"
+                    placeholder={`0.00 ${currentCurrency.code}`}
                     className="modal-input"
                   />
-                  <small>Available: ${cashAvailable.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</small>
+                  <small>Available: {formatCurrency(baseCashAvailable)}</small>
                 </div>
                 <div className="modal-input-group">
                   <label>Bank Account</label>
