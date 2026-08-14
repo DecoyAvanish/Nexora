@@ -76,7 +76,6 @@ function Feed() {
       message = 'Markets Closed';
     }
 
-    // Calculate time left
     let targetHour, targetMinute, timePhrase;
 
     if (isWeekday && !isHoliday) {
@@ -188,7 +187,6 @@ function Feed() {
           <h2>$4.11</h2>
         </div>
         
-        {/* Premium Market Status Box */}
         <div className="market-status-box">
           <div className="status-glow"></div>
           <div className="status-shimmer"></div>

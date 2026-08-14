@@ -9,7 +9,6 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== CHART SECTION ===== */
 .chartsection {
   display: flex;
   flex-direction: column;
@@ -71,7 +70,6 @@
   margin-top: 4px;
 }
 
-/* ===== BUYING POWER ===== */
 .buying {
   display: flex;
   justify-content: space-between;
@@ -99,7 +97,6 @@
   background-clip: text;
 }
 
-/* ===== PREMIUM MARKET STATUS ===== */
 .market-status-box {
   position: relative;
   margin-top: 20px;
@@ -393,20 +390,21 @@
   font-family: 'IBM Plex Mono', monospace;
   font-size: 11px;
   font-weight: 500;
-  color: rgba(240, 237, 255, 0.2);
+  color: rgba(240, 237, 255, 0.25);
   padding: 4px 12px;
   background: rgba(240, 237, 255, 0.03);
   border-radius: 20px;
   border: 1px solid rgba(240, 237, 255, 0.03);
   backdrop-filter: blur(8px);
-  -webkit-text-fill-color: rgba(240, 237, 255, 0.2);
+  -webkit-text-fill-color: rgba(240, 237, 255, 0.25);
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .market-status-box:hover .status-time-badge {
   border-color: rgba(240, 237, 255, 0.06);
-  color: rgba(240, 237, 255, 0.3);
-  -webkit-text-fill-color: rgba(240, 237, 255, 0.3);
+  color: rgba(240, 237, 255, 0.35);
+  -webkit-text-fill-color: rgba(240, 237, 255, 0.35);
 }
 
 .status-time-badge svg {
@@ -462,54 +460,172 @@
   100% { background-position: 200% 0; }
 }
 
-/* ===== POPULAR LISTS ===== */
 .poplist {
-  margin-top: 28px;
+  margin-top: 32px;
 }
 
 .poplist .intro {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 0 12px;
+  padding: 20px 4px 16px;
+  margin-bottom: 4px;
+  position: relative;
 }
 
 .poplist .intro h1 {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: #f0edff;
-  background: linear-gradient(135deg, #f0edff 0%, rgba(240, 237, 255, 0.6) 100%);
+  letter-spacing: -0.3px;
+  background: linear-gradient(135deg, #f0edff 0%, rgba(240, 237, 255, 0.5) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  position: relative;
+  padding-bottom: 4px;
+}
+
+.poplist .intro h1::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #A855F7, rgba(168, 85, 247, 0.2));
+  border-radius: 2px;
 }
 
 .poplist .intro p {
-  color: rgba(240, 237, 255, 0.3);
-  font-size: 12px;
+  color: rgba(240, 237, 255, 0.2);
+  font-size: 11px;
   font-family: 'IBM Plex Mono', monospace;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
 }
 
 .poplist .intro p:hover {
   color: #A855F7;
   transform: translateX(4px);
+  border-color: rgba(168, 85, 247, 0.08);
+  background: rgba(168, 85, 247, 0.03);
 }
 
 .badges {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
+  padding: 4px 2px;
 }
 
-/* ===== MARKET (hidden legacy) ===== */
+.badges .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(20, 15, 35, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(168, 85, 247, 0.06);
+  border-radius: 24px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(240, 237, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+.badges .chip::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.05), transparent 50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 24px;
+}
+
+.badges .chip:hover {
+  background: rgba(168, 85, 247, 0.08);
+  border-color: rgba(168, 85, 247, 0.15);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(168, 85, 247, 0.08), 0 0 40px rgba(168, 85, 247, 0.03);
+  color: #f0edff;
+}
+
+.badges .chip:hover::before {
+  opacity: 1;
+}
+
+.badges .chip:active {
+  transform: scale(0.96);
+  transition-duration: 0.1s;
+}
+
+.badges .chip .chip-icon {
+  font-size: 14px;
+  line-height: 1;
+  filter: grayscale(0.2);
+  transition: all 0.3s ease;
+}
+
+.badges .chip:hover .chip-icon {
+  filter: grayscale(0);
+  transform: scale(1.1);
+}
+
+.badges .chip .chip-label {
+  font-weight: 500;
+  letter-spacing: -0.2px;
+  background: linear-gradient(135deg, rgba(240, 237, 255, 0.8), rgba(240, 237, 255, 0.5));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
+}
+
+.badges .chip:hover .chip-label {
+  background: linear-gradient(135deg, #f0edff, #A855F7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.badges .chip::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(168, 85, 247, 0.03), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.badges .chip:hover::after {
+  opacity: 1;
+}
+
 .market {
   display: none;
 }
 
-/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .market-status-box {
     padding: 18px 20px;
@@ -558,9 +674,21 @@
   .portfolio h1 {
     font-size: 24px;
   }
+
+  .badges .chip {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  .badges .chip .chip-icon {
+    font-size: 12px;
+  }
+
+  .poplist .intro h1 {
+    font-size: 16px;
+  }
 }
 
-/* ===== ANIMATIONS ===== */
 @keyframes pulseGlow {
   0%, 100% { opacity: 0.3; }
   50% { opacity: 0.8; }
@@ -576,7 +704,6 @@
   50% { opacity: 1; transform: scale(1.2); }
 }
 
-/* ===== SCROLLBAR STYLING ===== */
 .feed::-webkit-scrollbar {
   width: 4px;
 }
