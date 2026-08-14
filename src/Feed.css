@@ -9,6 +9,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ===== CHART SECTION ===== */
 .chartsection {
   display: flex;
   flex-direction: column;
@@ -18,6 +19,11 @@
   border: 1px solid rgba(168, 85, 247, 0.06);
   border-radius: 16px;
   padding: 24px 24px 12px;
+  transition: all 0.3s ease;
+}
+
+.chartsection:hover {
+  border-color: rgba(168, 85, 247, 0.1);
 }
 
 .portfolio {
@@ -31,6 +37,10 @@
   font-size: 32px;
   font-weight: 700;
   color: #f0edff;
+  background: linear-gradient(135deg, #f0edff 0%, rgba(240, 237, 255, 0.7) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .portfolio p {
@@ -42,6 +52,7 @@
 
 .portfolio p span.positive {
   color: #A855F7;
+  font-weight: 600;
 }
 
 .chart-wrapper {
@@ -60,6 +71,7 @@
   margin-top: 4px;
 }
 
+/* ===== BUYING POWER ===== */
 .buying {
   display: flex;
   justify-content: space-between;
@@ -81,41 +93,376 @@
   color: #A855F7;
   font-weight: 700;
   font-size: 16px;
+  background: linear-gradient(135deg, #A855F7, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.market {
+/* ===== PREMIUM MARKET STATUS ===== */
+.market-status-box {
+  position: relative;
   margin-top: 20px;
+  padding: 24px 28px;
+  background: linear-gradient(145deg, rgba(10, 12, 20, 0.8), rgba(20, 15, 35, 0.6));
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(168, 85, 247, 0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
 }
 
-.box {
-  padding: 20px 24px;
-  border: 1px solid rgba(168, 85, 247, 0.06);
-  border-radius: 12px;
-  text-align: left;
-  background: rgba(168, 85, 247, 0.02);
+.market-status-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse at 30% 50%, rgba(168, 85, 247, 0.03), transparent 60%);
+  pointer-events: none;
+}
+
+.market-status-box:hover {
+  border-color: rgba(168, 85, 247, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 60px rgba(168, 85, 247, 0.03);
+}
+
+.market-status-box:hover .status-glow {
+  opacity: 1;
+}
+
+.status-glow {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 50%, rgba(168, 85, 247, 0.04), transparent 50%);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+
+.status-shimmer {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.02), transparent);
+  animation: shimmer 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  50% { left: 100%; }
+  100% { left: 100%; }
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.status-dot-container {
+  position: relative;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ff6b5e;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 0 20px rgba(255, 107, 94, 0.15);
+}
+
+.status-dot.active {
+  background: #4bff9b;
+  box-shadow: 0 0 30px rgba(75, 255, 155, 0.35), 0 0 60px rgba(75, 255, 155, 0.1);
+  animation: dotPulse 2s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+  0%, 100% { box-shadow: 0 0 30px rgba(75, 255, 155, 0.35), 0 0 60px rgba(75, 255, 155, 0.1); }
+  50% { box-shadow: 0 0 50px rgba(75, 255, 155, 0.5), 0 0 80px rgba(75, 255, 155, 0.15); }
+}
+
+.status-pulse {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(75, 255, 155, 0.08);
+  animation: statusPulse 2.5s ease-in-out infinite;
+  z-index: 1;
+}
+
+.status-pulse-delayed {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(75, 255, 155, 0.04);
+  animation: statusPulse 2.5s ease-in-out infinite 0.8s;
+  z-index: 1;
+}
+
+.status-pulse-pre {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(240, 180, 0, 0.08);
+  animation: statusPulsePre 2s ease-in-out infinite;
+  z-index: 1;
+}
+
+.status-pulse-after {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(100, 149, 237, 0.08);
+  animation: statusPulseAfter 2s ease-in-out infinite;
+  z-index: 1;
+}
+
+@keyframes statusPulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+}
+
+@keyframes statusPulsePre {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+}
+
+@keyframes statusPulseAfter {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+}
+
+.status-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.status-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.status-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(240, 237, 255, 0.15);
+}
+
+.status-label svg {
+  opacity: 0.4;
+}
+
+.status-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  padding: 3px 14px;
+  border-radius: 20px;
+  background: rgba(255, 107, 94, 0.06);
+  color: #ff6b5e;
+  border: 1px solid rgba(255, 107, 94, 0.08);
   transition: all 0.3s ease;
 }
 
-.box:hover {
-  border-color: rgba(168, 85, 247, 0.12);
+.status-badge.open {
+  background: rgba(75, 255, 155, 0.06);
+  color: #4bff9b;
+  border-color: rgba(75, 255, 155, 0.12);
+  animation: badgeGlow 3s ease-in-out infinite;
 }
 
-.box p {
-  color: rgba(240, 237, 255, 0.3);
-  font-size: 11px;
-  text-transform: uppercase;
-  font-weight: 600;
-  margin-bottom: 6px;
+.status-badge.pre {
+  background: rgba(240, 180, 0, 0.06);
+  color: #f0b400;
+  border-color: rgba(240, 180, 0, 0.12);
+}
+
+.status-badge.after {
+  background: rgba(100, 149, 237, 0.06);
+  color: #6495ed;
+  border-color: rgba(100, 149, 237, 0.12);
+}
+
+@keyframes badgeGlow {
+  0%, 100% { box-shadow: 0 0 10px rgba(75, 255, 155, 0); }
+  50% { box-shadow: 0 0 20px rgba(75, 255, 155, 0.05); }
+}
+
+.status-timestamp {
   font-family: 'IBM Plex Mono', monospace;
-  letter-spacing: 2px;
+  font-size: 9px;
+  color: rgba(240, 237, 255, 0.3);
+  letter-spacing: 1px;
+  min-width: 50px;
 }
 
-.box h1 {
+.status-message-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.status-message {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 20px;
+  font-size: 22px;
+  font-weight: 700;
   color: #f0edff;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #f0edff 0%, rgba(240, 237, 255, 0.7) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
+.status-time-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(240, 237, 255, 0.2);
+  padding: 4px 12px;
+  background: rgba(240, 237, 255, 0.03);
+  border-radius: 20px;
+  border: 1px solid rgba(240, 237, 255, 0.03);
+  backdrop-filter: blur(8px);
+  -webkit-text-fill-color: rgba(240, 237, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.market-status-box:hover .status-time-badge {
+  border-color: rgba(240, 237, 255, 0.06);
+  color: rgba(240, 237, 255, 0.3);
+  -webkit-text-fill-color: rgba(240, 237, 255, 0.3);
+}
+
+.status-time-badge svg {
+  opacity: 0.3;
+}
+
+.status-progress {
+  margin-top: 12px;
+  width: 100%;
+  height: 2px;
+  background: rgba(240, 237, 255, 0.03);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.status-progress-bar {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #A855F7, #4bff9b);
+  width: 0%;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.status-progress-bar::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -2px;
+  width: 8px;
+  height: 6px;
+  background: #4bff9b;
+  border-radius: 50%;
+  filter: blur(4px);
+  opacity: 0.6;
+  animation: progressGlow 2s ease-in-out infinite;
+}
+
+@keyframes progressGlow {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.5); }
+}
+
+.status-progress-bar.open {
+  background: linear-gradient(90deg, #4bff9b, #A855F7, #4bff9b);
+  background-size: 200% 100%;
+  animation: progressShimmer 3s ease-in-out infinite;
+}
+
+@keyframes progressShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ===== POPULAR LISTS ===== */
 .poplist {
   margin-top: 28px;
 }
@@ -132,6 +479,10 @@
   font-size: 20px;
   font-weight: 700;
   color: #f0edff;
+  background: linear-gradient(135deg, #f0edff 0%, rgba(240, 237, 255, 0.6) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .poplist .intro p {
@@ -139,11 +490,12 @@
   font-size: 12px;
   font-family: 'IBM Plex Mono', monospace;
   cursor: pointer;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .poplist .intro p:hover {
   color: #A855F7;
+  transform: translateX(4px);
 }
 
 .badges {
@@ -152,20 +504,92 @@
   gap: 10px;
 }
 
+/* ===== MARKET (hidden legacy) ===== */
+.market {
+  display: none;
+}
+
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-  .feed {
-    flex: 1;
+  .market-status-box {
+    padding: 18px 20px;
   }
   
-  .portfolio h1 {
-    font-size: 26px;
+  .status-dot-container {
+    width: 38px;
+    height: 38px;
+  }
+  
+  .status-dot {
+    width: 11px;
+    height: 11px;
+  }
+  
+  .status-pulse,
+  .status-pulse-delayed,
+  .status-pulse-pre,
+  .status-pulse-after {
+    width: 38px;
+    height: 38px;
+  }
+  
+  .status-message {
+    font-size: 17px;
+  }
+  
+  .status-time-badge {
+    font-size: 9px;
+    padding: 3px 10px;
+  }
+  
+  .status-badge {
+    font-size: 7px;
+    padding: 2px 10px;
+  }
+  
+  .status-timestamp {
+    display: none;
   }
   
   .chartsection {
-    padding: 16px 16px 8px;
+    padding: 16px 16px 10px;
   }
   
-  .chart {
-    height: 140px;
+  .portfolio h1 {
+    font-size: 24px;
   }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* ===== SCROLLBAR STYLING ===== */
+.feed::-webkit-scrollbar {
+  width: 4px;
+}
+
+.feed::-webkit-scrollbar-track {
+  background: rgba(10, 12, 20, 0.3);
+}
+
+.feed::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.3);
+  border-radius: 4px;
+}
+
+.feed::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.5);
 }
