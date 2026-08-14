@@ -1,81 +1,91 @@
-import React, { useEffect, useState } from 'react'
-import './Stats.css'
-import axios from "axios"
-import StatsRow from './StatsRow'
-import { database } from "./firebase";
+import React, { useEffect, useState } from 'react';
+import './Stats.css';
+import axios from 'axios';
+import StatsRow from './StatsRow';
+import { database } from './firebase';
 import { collection, onSnapshot, query } from 'firebase/firestore';
 
-const BASE_URL = "https://finnhub.io/api/v1/quote";
-const TOKEN = "d9tj431r01qujo6kusr0d9tj431r01qujo6kusrg";
+const FINNHUB_TOKEN = "d9tj431r01qujo6kusr0d9tj431r01qujo6kusrg";
 
 function Stats() {
-  const [stockData, setStockData] = useState([])
-  const [myStocks, setMyStocks] = useState([])
+  const [stockData, setStockData] = useState([]);
+  const [myStocks, setMyStocks] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const getStockData = (stock) => {
-    return axios
-      .get(`${BASE_URL}?symbol=${stock}&token=${TOKEN}`)
-      .then((res) => res.data)
-      .catch((error) => {
-        console.error("Error", error.message);
-        return null;
-      });
-  }
-  
+  const getStockData = async (stock) => {
+    try {
+      const response = await axios.get(
+        `https://finnhub.io/api/v1/quote?symbol=${stock}&token=${FINNHUB_TOKEN}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching ${stock}:`, error.message);
+      return null;
+    }
+  };
+
   const getMyStocks = () => {
     const stocksCollection = collection(database, 'myStocks');
     const q = query(stocksCollection);
     
-    onSnapshot(q, (snapshot) => {
+    onSnapshot(q, async (snapshot) => {
       let promises = [];
       let tempData = [];
       
       snapshot.docs.forEach((doc) => {
         promises.push(
           getStockData(doc.data().ticker)
-          .then(res => {
-            if (res) {
-              tempData.push({
-                id: doc.id,
-                data: doc.data(),
-                info: res
-              });
-            }
-          })
+            .then(res => {
+              if (res) {
+                tempData.push({
+                  id: doc.id,
+                  data: doc.data(),
+                  info: res
+                });
+              }
+            })
         );
       });
       
-      Promise.all(promises).then(() => {
-        setMyStocks(tempData);
-      });
+      await Promise.all(promises);
+      setMyStocks(tempData);
+      setLoading(false);
     });
-  }
+  };
 
   useEffect(() => {
-    let stockDataArray = []
-    const stockList = ["AAPL", "MSFT", "TSLA", "FB", "BABA", "UBER", "DIS", "SBUX"];
-    let promises = [];
-    
-    getMyStocks();
-    
-    stockList.forEach((stock) => {
-      promises.push(
-        getStockData(stock)
-        .then((data) => {
-          if(data) {
-            stockDataArray.push({
-              name: stock,
-              ...data
-            });
-          }
-        })
-      )
-    });
+    const fetchMarketData = async () => {
+      const stockList = ["AAPL", "MSFT", "TSLA", "META", "BABA", "UBER", "DIS", "SBUX"];
+      let promises = [];
+      let tempData = [];
 
-    Promise.all(promises).then(() => {
-      setStockData(stockDataArray);
-    });
-  }, [])
+      stockList.forEach((stock) => {
+        promises.push(
+          getStockData(stock)
+            .then((data) => {
+              if (data) {
+                tempData.push({
+                  name: stock,
+                  c: data.c,
+                  pc: data.pc,
+                  o: data.o,
+                  h: data.h,
+                  l: data.l,
+                  d: data.d,
+                  dp: data.dp 
+                });
+              }
+            })
+        );
+      });
+
+      await Promise.all(promises);
+      setStockData(tempData);
+    };
+
+    getMyStocks();
+    fetchMarketData();
+  }, []);
 
   return (
     <div className="stats">
@@ -86,18 +96,23 @@ function Stats() {
         </div>
         <div className="content">
           <div className="rows">
-            {myStocks.length > 0 ? (
+            {loading ? (
+              <div style={{ padding: '20px', textAlign: 'center', color: 'rgba(240,237,255,0.2)', fontSize: '11px', fontFamily: "'IBM Plex Mono', monospace" }}>
+                Loading...
+              </div>
+            ) : myStocks.length > 0 ? (
               myStocks.map((stock) => (
                 <StatsRow
                   key={stock.id}
                   name={stock.data.ticker}
+                  price={stock.info.c || stock.info.pc || 0}
+                  previousClose={stock.info.pc || stock.info.o || 0}
                   openPrice={stock.info.o || 0}
                   shares={stock.data.shares || 0}
-                  price={stock.info.c || 0}
                 />
               ))
             ) : (
-              <div style={{ padding: '20px', textAlign: 'center', color: 'rgba(240,237,255,0.2)', fontSize: '12px', fontFamily: "'IBM Plex Mono', monospace" }}>
+              <div style={{ padding: '20px', textAlign: 'center', color: 'rgba(240,237,255,0.2)', fontSize: '11px', fontFamily: "'IBM Plex Mono', monospace" }}>
                 No stocks in portfolio
               </div>
             )}
@@ -113,16 +128,17 @@ function Stats() {
               <StatsRow
                 key={stock.name}
                 name={stock.name}
+                price={stock.c || stock.pc || 0}
+                previousClose={stock.pc || stock.o || 0}
                 openPrice={stock.o || 0}
-                shares={stock.v || 0}
-                price={stock.c || 0}
+                shares={0}
               />
             ))}
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Stats
+export default Stats;

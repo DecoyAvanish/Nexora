@@ -19,11 +19,13 @@
   max-width: 80px;
   height: 30px;
   margin: 0 12px;
+  position: relative;
 }
 
 .row .sparkline canvas {
   width: 100% !important;
   height: 100% !important;
+  display: block;
 }
 
 .intro {

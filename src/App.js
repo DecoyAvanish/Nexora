@@ -15,6 +15,23 @@ function App() {
   const [currentPage, setCurrentPage] = useState('portfolio');
   const [showAuth, setShowAuth] = useState('login');
 
+  const orbs = Array.from({ length: 4 }, (_, i) => {
+    const size = 250 + Math.random() * 350;
+    const x = 10 + Math.random() * 80;
+    const duration = 35 + Math.random() * 30;
+    const delay = Math.random() * 30;
+    const type = ['orb-purple', 'orb-pink', 'orb-blue'][Math.floor(Math.random() * 3)];
+    return { id: i, size, x, duration, delay, type };
+  });
+
+  const particles = Array.from({ length: 20 }, (_, i) => ({
+    id: i,
+    size: 1.5 + Math.random() * 2.5,
+    x: 5 + Math.random() * 90,
+    duration: 25 + Math.random() * 25,
+    delay: Math.random() * 25,
+  }));
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
@@ -43,6 +60,41 @@ function App() {
   const handleSwitchToLogin = () => {
     setShowAuth('login');
   };
+
+  const renderSpaceBackground = () => (
+    <div className="bg-space">
+      <div className="bg-stars"></div>
+      
+      <div className="bg-grid-overlay"></div>
+      
+      {orbs.map((orb) => (
+        <div 
+          key={orb.id}
+          className={`space-orb ${orb.type}`}
+          style={{
+            width: orb.size + 'px',
+            height: orb.size + 'px',
+            left: orb.x + '%',
+            '--duration': orb.duration + 's',
+            '--delay': orb.delay + 's'
+          }}
+        />
+      ))}
+      
+      {particles.map((particle) => (
+        <div 
+          key={particle.id}
+          className="space-particle"
+          style={{
+            '--size': particle.size + 'px',
+            left: particle.x + '%',
+            '--duration': particle.duration + 's',
+            '--delay': particle.delay + 's'
+          }}
+        />
+      ))}
+    </div>
+  );
 
   const renderContent = () => {
     if (!user) {
@@ -91,6 +143,8 @@ function App() {
 
   return (
     <div className="App">
+      {user && currentPage === 'portfolio' && renderSpaceBackground()}
+
       <div className="header">
         <Header 
           onNavigate={setCurrentPage} 

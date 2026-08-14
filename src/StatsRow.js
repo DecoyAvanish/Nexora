@@ -1,30 +1,89 @@
-// StatsRow.js - Updated with sparkline charts
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import axios from 'axios';
 import './StatsRow.css';
 
-function StatsRow(props) {
-  const per = ((props.price - props.openPrice) / props.openPrice) * 100;
-  const isPositive = per >= 0;
-  const canvasRef = useRef(null);
+const FINNHUB_TOKEN = "d9tj431r01qujo6kusr0d9tj431r01qujo6kusrg";
+const CACHE = {};
 
-  // Generate mock sparkline data for each stock
-  const generateSparklineData = () => {
-    const data = [];
-    let val = props.openPrice || 100;
-    const steps = 30;
-    
-    for (let i = 0; i < steps; i++) {
-      const change = (Math.random() - 0.48) * 5;
-      val = Math.max(val + change, val * 0.7);
-      data.push(val);
-    }
-    // Make sure last value matches current price
-    data[data.length - 1] = props.price || val;
-    return data;
-  };
+function StatsRow(props) {
+  const currentPrice = props.price || 0;
+  const previousClose = props.previousClose || props.openPrice || currentPrice;
+  
+  const per = previousClose > 0 ? ((currentPrice - previousClose) / previousClose) * 100 : 0;
+  const isPositive = per >= 0;
+  
+  const canvasRef = useRef(null);
+  const [sparklineData, setSparklineData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    const fetchHistoricalData = async () => {
+      if (!props.name) return;
+      
+      if (CACHE[props.name]) {
+        setSparklineData(CACHE[props.name]);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 30);
+        
+        const from = Math.floor(startDate.getTime() / 1000);
+        const to = Math.floor(endDate.getTime() / 1000);
+        
+        const response = await axios.get(
+          `https://finnhub.io/api/v1/stock/candle?symbol=${props.name}&resolution=D&from=${from}&to=${to}&token=${FINNHUB_TOKEN}`
+        );
+        
+        if (response.data && response.data.c && response.data.c.length > 0) {
+          let data = response.data.c;
+          if (data.length > 0 && currentPrice > 0) {
+            data[data.length - 1] = currentPrice;
+          }
+          CACHE[props.name] = data;
+          setSparklineData(data);
+        } else {
+          const mockData = generateMockData();
+          CACHE[props.name] = mockData;
+          setSparklineData(mockData);
+        }
+      } catch (error) {
+        console.error(`Error fetching data for ${props.name}:`, error);
+        const mockData = generateMockData();
+        CACHE[props.name] = mockData;
+        setSparklineData(mockData);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const generateMockData = () => {
+      const data = [];
+      let val = previousClose || 100;
+      const steps = 30;
+      const targetEnd = currentPrice || val;
+      
+      for (let i = 0; i < steps; i++) {
+        const progress = i / steps;
+        const noise = (Math.random() - 0.5) * 3;
+        const trend = (targetEnd - val) * progress;
+        const current = val + trend + noise * (1 - progress * 0.8);
+        data.push(Math.max(current, 0.1));
+      }
+      if (data.length > 0) {
+        data[data.length - 1] = targetEnd;
+      }
+      return data;
+    };
+
+    fetchHistoricalData();
+  }, [props.name, currentPrice, previousClose]);
+
+  useEffect(() => {
+    if (!canvasRef.current || loading || !sparklineData || sparklineData.length < 2) return;
     
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -38,12 +97,14 @@ function StatsRow(props) {
     
     ctx.scale(dpr, dpr);
     
-    const data = generateSparklineData();
+    const data = sparklineData;
     const width = rect.width;
     const height = rect.height;
     const padding = 2;
     const graphWidth = width - padding * 2;
     const graphHeight = height - padding * 2;
+    
+    const lineColor = isPositive ? '#A855F7' : '#ff6b5e';
     
     const min = Math.min(...data) * 0.98;
     const max = Math.max(...data) * 1.02;
@@ -51,17 +112,15 @@ function StatsRow(props) {
     
     ctx.clearRect(0, 0, width, height);
     
-    // Draw gradient fill
     const gradient = ctx.createLinearGradient(0, 0, 0, height);
     if (isPositive) {
-      gradient.addColorStop(0, 'rgba(168, 85, 247, 0.15)');
+      gradient.addColorStop(0, 'rgba(168, 85, 247, 0.2)');
       gradient.addColorStop(1, 'rgba(168, 85, 247, 0)');
     } else {
-      gradient.addColorStop(0, 'rgba(255, 107, 94, 0.15)');
+      gradient.addColorStop(0, 'rgba(255, 107, 94, 0.2)');
       gradient.addColorStop(1, 'rgba(255, 107, 94, 0)');
     }
     
-    // Draw fill
     ctx.beginPath();
     ctx.moveTo(padding, height - padding);
     data.forEach((val, i) => {
@@ -75,7 +134,6 @@ function StatsRow(props) {
     ctx.fillStyle = gradient;
     ctx.fill();
     
-    // Draw line
     ctx.beginPath();
     data.forEach((val, i) => {
       const x = padding + (i / (data.length - 1)) * graphWidth;
@@ -83,7 +141,7 @@ function StatsRow(props) {
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     });
-    ctx.strokeStyle = isPositive ? '#A855F7' : '#ff6b5e';
+    ctx.strokeStyle = lineColor;
     ctx.lineWidth = 1.5;
     ctx.stroke();
     
@@ -91,13 +149,13 @@ function StatsRow(props) {
     const lastY = padding + (1 - (data[data.length - 1] - min) / range) * graphHeight;
     ctx.beginPath();
     ctx.arc(lastX, lastY, 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = isPositive ? '#A855F7' : '#ff6b5e';
+    ctx.fillStyle = lineColor;
     ctx.fill();
     ctx.strokeStyle = '#080a11';
     ctx.lineWidth = 1;
     ctx.stroke();
     
-  }, [props.price, props.openPrice]);
+  }, [sparklineData, loading, isPositive]);
 
   return (
     <div className="row">
@@ -109,7 +167,7 @@ function StatsRow(props) {
         <canvas ref={canvasRef} />
       </div>
       <div className="num">
-        <p className="price">${props.price?.toFixed(2) || '0.00'}</p>
+        <p className="price">${currentPrice.toFixed(2)}</p>
         <p className={`per ${isPositive ? 'positive' : 'negative'}`}>
           {isPositive ? '+' : ''}{per.toFixed(2)}%
         </p>
