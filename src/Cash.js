@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react'
-import './Cash.css'
+import React, { useState, useEffect } from 'react';
+import './Cash.css';
 
+// Comprehensive currency list with symbols
 const currencies = [
   { code: 'USD', symbol: '$', name: 'US Dollar', rate: 1 },
   { code: 'EUR', symbol: '€', name: 'Euro', rate: 0.92 },
@@ -46,74 +47,59 @@ const currencies = [
   { code: 'COP', symbol: '$', name: 'Colombian Peso', rate: 3950 },
   { code: 'PEN', symbol: 'S/', name: 'Peruvian Sol', rate: 3.82 },
   { code: 'ARS', symbol: '$', name: 'Argentine Peso', rate: 880 },
-]
+];
 
 const Cash = () => {
-  const [baseBalance] = useState(114656.00)
-  const [baseBuyingPower] = useState(4110.00)
-  const [baseCashAvailable] = useState(2850.50)
-  const [withdrawAmount, setWithdrawAmount] = useState('')
-  const [depositAmount, setDepositAmount] = useState('')
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('bank')
-  const [showDepositModal, setShowDepositModal] = useState(false)
-  const [showWithdrawModal, setShowWithdrawModal] = useState(false)
+  const [baseBalance] = useState(114656.00);
+  const [baseBuyingPower] = useState(4110.00);
+  const [baseCashAvailable] = useState(2850.50);
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [depositAmount, setDepositAmount] = useState('');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('bank');
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState(() => {
-    const saved = localStorage.getItem('preferredCurrency')
-    return saved || 'USD'
-  })
-  
+    const saved = localStorage.getItem('preferredCurrency');
+    return saved || 'USD';
+  });
+
   const [transactionHistory, setTransactionHistory] = useState([
     { id: 1, type: 'deposit', amount: 5000, date: '2026-08-10', status: 'completed', method: 'Bank Transfer' },
     { id: 2, type: 'withdraw', amount: 2000, date: '2026-08-08', status: 'completed', method: 'Bank Transfer' },
     { id: 3, type: 'deposit', amount: 1000, date: '2026-08-05', status: 'pending', method: 'Credit Card' },
     { id: 4, type: 'deposit', amount: 3000, date: '2026-08-01', status: 'completed', method: 'Wire Transfer' },
     { id: 5, type: 'withdraw', amount: 1500, date: '2026-07-28', status: 'completed', method: 'Bank Transfer' },
-  ])
+  ]);
 
   const [paymentMethods, setPaymentMethods] = useState([
     { id: 1, type: 'Bank Account', name: 'Chase Bank', last4: '4829', default: true },
     { id: 2, type: 'Credit Card', name: 'Visa', last4: '2345', default: false },
     { id: 3, type: 'Wire Transfer', name: 'Wells Fargo', last4: '6781', default: false },
-  ])
+  ]);
 
-  const [defaultPayment, setDefaultPayment] = useState(1)
+  const currentCurrency = currencies.find(c => c.code === selectedCurrency) || currencies[0];
+  const exchangeRate = currentCurrency.rate;
 
-  const currentCurrency = currencies.find(c => c.code === selectedCurrency) || currencies[0]
-  const exchangeRate = currentCurrency.rate
-
-  const convertAmount = (amount) => {
-    return amount * exchangeRate
-  }
+  const convertAmount = (amount) => amount * exchangeRate;
 
   const formatCurrency = (amount) => {
-    const converted = convertAmount(amount)
-    const symbol = currentCurrency.symbol
-    
+    const converted = convertAmount(amount);
+    const symbol = currentCurrency.symbol;
     if (selectedCurrency === 'JPY' || selectedCurrency === 'KRW' || selectedCurrency === 'IDR' || selectedCurrency === 'VND') {
-      return `${symbol}${Math.round(converted).toLocaleString()}`
+      return `${symbol}${Math.round(converted).toLocaleString()}`;
     }
-    
     if (selectedCurrency === 'KWD' || selectedCurrency === 'BHD' || selectedCurrency === 'OMR') {
-      return `${symbol}${converted.toFixed(3)}`
+      return `${symbol}${converted.toFixed(3)}`;
     }
-    
-    return `${symbol}${converted.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-  }
-
-  const formatAmount = (amount, showSymbol = true) => {
-    if (showSymbol) {
-      return formatCurrency(amount)
-    }
-    const converted = convertAmount(amount)
-    return converted.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-  }
+    return `${symbol}${converted.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
 
   useEffect(() => {
-    localStorage.setItem('preferredCurrency', selectedCurrency)
-  }, [selectedCurrency])
+    localStorage.setItem('preferredCurrency', selectedCurrency);
+  }, [selectedCurrency]);
 
   const handleDeposit = () => {
-    const amount = parseFloat(depositAmount)
+    const amount = parseFloat(depositAmount);
     if (amount > 0) {
       const newTransaction = {
         id: transactionHistory.length + 1,
@@ -121,18 +107,17 @@ const Cash = () => {
         amount: amount / exchangeRate,
         date: new Date().toISOString().split('T')[0],
         status: 'pending',
-        method: selectedPaymentMethod === 'bank' ? 'Bank Transfer' : 
-                selectedPaymentMethod === 'card' ? 'Credit Card' : 'Wire Transfer'
-      }
-      setTransactionHistory([newTransaction, ...transactionHistory])
-      setDepositAmount('')
-      setShowDepositModal(false)
+        method: selectedPaymentMethod === 'bank' ? 'Bank Transfer' : selectedPaymentMethod === 'card' ? 'Credit Card' : 'Wire Transfer',
+      };
+      setTransactionHistory([newTransaction, ...transactionHistory]);
+      setDepositAmount('');
+      setShowDepositModal(false);
     }
-  }
+  };
 
   const handleWithdraw = () => {
-    const amount = parseFloat(withdrawAmount)
-    const convertedAmount = amount / exchangeRate
+    const amount = parseFloat(withdrawAmount);
+    const convertedAmount = amount / exchangeRate;
     if (amount > 0 && convertedAmount <= baseCashAvailable) {
       const newTransaction = {
         id: transactionHistory.length + 1,
@@ -140,44 +125,60 @@ const Cash = () => {
         amount: convertedAmount,
         date: new Date().toISOString().split('T')[0],
         status: 'pending',
-        method: 'Bank Transfer'
-      }
-      setTransactionHistory([newTransaction, ...transactionHistory])
-      setWithdrawAmount('')
-      setShowWithdrawModal(false)
+        method: 'Bank Transfer',
+      };
+      setTransactionHistory([newTransaction, ...transactionHistory]);
+      setWithdrawAmount('');
+      setShowWithdrawModal(false);
     }
-  }
+  };
 
-  const getTotalAssets = () => {
-    return baseBalance + baseBuyingPower + baseCashAvailable
-  }
-
+  const getTotalAssets = () => baseBalance + baseBuyingPower + baseCashAvailable;
   const getStatusColor = (status) => {
-    switch(status) {
-      case 'completed': return 'status-completed'
-      case 'pending': return 'status-pending'
-      case 'failed': return 'status-failed'
-      default: return ''
+    switch (status) {
+      case 'completed': return 'status-completed';
+      case 'pending': return 'status-pending';
+      case 'failed': return 'status-failed';
+      default: return '';
     }
-  }
-
-  const getTypeColor = (type) => {
-    return type === 'deposit' ? 'type-deposit' : 'type-withdraw'
-  }
+  };
+  const getTypeColor = (type) => (type === 'deposit' ? 'type-deposit' : 'type-withdraw');
 
   return (
     <div className="cash-page">
+      {/* ===== ENHANCED COOL BACKGROUND ===== */}
+      <div className="cash-bg">
+        {/* orbital rings */}
+        <div className="ring r1"></div>
+        <div className="ring r2"></div>
+        <div className="ring r3"></div>
+        <div className="ring r4"></div>
+        {/* floating orbs */}
+        <div className="orb o1"></div>
+        <div className="orb o2"></div>
+        <div className="orb o3"></div>
+        <div className="orb o4"></div>
+        <div className="orb o5"></div>
+        {/* animated grid */}
+        <div className="grid"></div>
+        {/* scanning line */}
+        <div className="scan"></div>
+        {/* extra subtle sparkles (pseudo) */}
+        <div className="sparkle-container">
+          {[...Array(12)].map((_, i) => (
+            <div key={i} className="sparkle" style={{ '--x': `${5 + Math.random() * 90}%`, '--y': `${5 + Math.random() * 90}%`, '--delay': `${Math.random() * 8}s`, '--size': `${2 + Math.random() * 4}px` }}></div>
+          ))}
+        </div>
+      </div>
+
       <div className="cash-container">
+        {/* Header */}
         <div className="cash-header">
           <h1>Cash Management</h1>
           <div className="cash-header-actions">
             <span className="currency-selector">
-              <select 
-                value={selectedCurrency} 
-                onChange={(e) => setSelectedCurrency(e.target.value)}
-                className="currency-select"
-              >
-                {currencies.map(currency => (
+              <select value={selectedCurrency} onChange={(e) => setSelectedCurrency(e.target.value)} className="currency-select">
+                {currencies.map((currency) => (
                   <option key={currency.code} value={currency.code}>
                     {currency.code} - {currency.name} ({currency.symbol})
                   </option>
@@ -187,6 +188,7 @@ const Cash = () => {
           </div>
         </div>
 
+        {/* Balance Overview */}
         <div className="balance-overview">
           <div className="balance-card total">
             <div className="balance-label">Total Assets</div>
@@ -210,48 +212,50 @@ const Cash = () => {
           </div>
         </div>
 
+        {/* Quick Actions */}
         <div className="quick-actions">
           <button className="action-btn deposit" onClick={() => setShowDepositModal(true)}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="16"/>
-              <line x1="8" y1="12" x2="16" y2="12"/>
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="16" />
+              <line x1="8" y1="12" x2="16" y2="12" />
             </svg>
             Deposit Funds
           </button>
           <button className="action-btn withdraw" onClick={() => setShowWithdrawModal(true)}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="16"/>
-              <line x1="8" y1="12" x2="16" y2="12"/>
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="16" />
+              <line x1="8" y1="12" x2="16" y2="12" />
             </svg>
             Withdraw Funds
           </button>
           <button className="action-btn transfer">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M17 1l4 4-4 4"/>
-              <path d="M3 11V9a4 4 0 014-4h14"/>
-              <path d="M7 23l-4-4 4-4"/>
-              <path d="M21 13v2a4 4 0 01-4 4H3"/>
+              <path d="M17 1l4 4-4 4" />
+              <path d="M3 11V9a4 4 0 014-4h14" />
+              <path d="M7 23l-4-4 4-4" />
+              <path d="M21 13v2a4 4 0 01-4 4H3" />
             </svg>
             Transfer
           </button>
           <button className="action-btn history">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="10"/>
-              <polyline points="12 6 12 12 16 14"/>
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
             </svg>
             History
           </button>
         </div>
 
+        {/* Payment Methods */}
         <div className="payment-section">
           <div className="section-header">
             <h2>Payment Methods</h2>
             <button className="add-method-btn">+ Add New</button>
           </div>
           <div className="payment-methods">
-            {paymentMethods.map(method => (
+            {paymentMethods.map((method) => (
               <div key={method.id} className={`payment-card ${method.default ? 'default' : ''}`}>
                 <div className="payment-info">
                   <div className="payment-icon">
@@ -274,6 +278,7 @@ const Cash = () => {
           </div>
         </div>
 
+        {/* Transaction History */}
         <div className="transaction-section">
           <div className="section-header">
             <h2>Transaction History</h2>
@@ -285,16 +290,14 @@ const Cash = () => {
             </select>
           </div>
           <div className="transaction-list">
-            {transactionHistory.map(transaction => (
+            {transactionHistory.map((transaction) => (
               <div key={transaction.id} className="transaction-item">
                 <div className="transaction-left">
                   <div className={`transaction-icon ${getTypeColor(transaction.type)}`}>
                     {transaction.type === 'deposit' ? '↓' : '↑'}
                   </div>
                   <div className="transaction-details">
-                    <div className="transaction-type">
-                      {transaction.type === 'deposit' ? 'Deposit' : 'Withdrawal'}
-                    </div>
+                    <div className="transaction-type">{transaction.type === 'deposit' ? 'Deposit' : 'Withdrawal'}</div>
                     <div className="transaction-meta">
                       <span>{transaction.method}</span>
                       <span>•</span>
@@ -306,15 +309,14 @@ const Cash = () => {
                   <div className={`transaction-amount ${getTypeColor(transaction.type)}`}>
                     {transaction.type === 'deposit' ? '+' : '-'}{formatCurrency(transaction.amount)}
                   </div>
-                  <div className={`transaction-status ${getStatusColor(transaction.status)}`}>
-                    {transaction.status}
-                  </div>
+                  <div className={`transaction-status ${getStatusColor(transaction.status)}`}>{transaction.status}</div>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
+        {/* Settings Section */}
         <div className="settings-section">
           <div className="section-header">
             <h2>Cash Settings</h2>
@@ -323,12 +325,8 @@ const Cash = () => {
             <div className="setting-item">
               <div className="setting-label">Default Currency</div>
               <div className="setting-value">
-                <select 
-                  value={selectedCurrency} 
-                  onChange={(e) => setSelectedCurrency(e.target.value)}
-                  className="setting-select"
-                >
-                  {currencies.map(currency => (
+                <select value={selectedCurrency} onChange={(e) => setSelectedCurrency(e.target.value)} className="setting-select">
+                  {currencies.map((currency) => (
                     <option key={currency.code} value={currency.code}>
                       {currency.code} - {currency.name} ({currency.symbol})
                     </option>
@@ -363,6 +361,7 @@ const Cash = () => {
           </div>
         </div>
 
+        {/* Deposit Modal */}
         {showDepositModal && (
           <div className="modal-overlay" onClick={() => setShowDepositModal(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -373,21 +372,11 @@ const Cash = () => {
               <div className="modal-body">
                 <div className="modal-input-group">
                   <label>Amount ({currentCurrency.code})</label>
-                  <input 
-                    type="number" 
-                    value={depositAmount}
-                    onChange={(e) => setDepositAmount(e.target.value)}
-                    placeholder={`0.00 ${currentCurrency.code}`}
-                    className="modal-input"
-                  />
+                  <input type="number" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} placeholder={`0.00 ${currentCurrency.code}`} className="modal-input" />
                 </div>
                 <div className="modal-input-group">
                   <label>Payment Method</label>
-                  <select 
-                    value={selectedPaymentMethod} 
-                    onChange={(e) => setSelectedPaymentMethod(e.target.value)}
-                    className="modal-select"
-                  >
+                  <select value={selectedPaymentMethod} onChange={(e) => setSelectedPaymentMethod(e.target.value)} className="modal-select">
                     <option value="bank">Bank Transfer</option>
                     <option value="card">Credit Card</option>
                     <option value="wire">Wire Transfer</option>
@@ -402,6 +391,7 @@ const Cash = () => {
           </div>
         )}
 
+        {/* Withdraw Modal */}
         {showWithdrawModal && (
           <div className="modal-overlay" onClick={() => setShowWithdrawModal(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -412,13 +402,7 @@ const Cash = () => {
               <div className="modal-body">
                 <div className="modal-input-group">
                   <label>Amount ({currentCurrency.code})</label>
-                  <input 
-                    type="number" 
-                    value={withdrawAmount}
-                    onChange={(e) => setWithdrawAmount(e.target.value)}
-                    placeholder={`0.00 ${currentCurrency.code}`}
-                    className="modal-input"
-                  />
+                  <input type="number" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} placeholder={`0.00 ${currentCurrency.code}`} className="modal-input" />
                   <small>Available: {formatCurrency(baseCashAvailable)}</small>
                 </div>
                 <div className="modal-input-group">
@@ -438,7 +422,7 @@ const Cash = () => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Cash
+export default Cash;

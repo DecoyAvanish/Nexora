@@ -1,17 +1,19 @@
+/* ===== CASH PAGE ===== */
 .cash-page {
-  flex: 0.7;
-  color: #f0edff;
-  animation: fadeIn 0.8s ease;
-  padding: 20px 20px 20px 0;
+  flex: 1;
+  padding: 24px 28px 40px 28px;
   overflow-y: auto;
-  height: calc(100vh - 80px);
+  height: 100vh;
   scrollbar-width: thin;
-  scrollbar-color: rgba(168, 85, 247, 0.3) transparent;
+  scrollbar-color: rgba(168, 85, 247, 0.4) transparent;
   position: relative;
+  z-index: 2;
+  animation: fadeIn 0.6s ease;
 }
 
 .cash-page::-webkit-scrollbar {
-  width: 4px;
+  width: 5px;
+  height: 5px;
 }
 
 .cash-page::-webkit-scrollbar-track {
@@ -19,37 +21,204 @@
 }
 
 .cash-page::-webkit-scrollbar-thumb {
-  background: rgba(168, 85, 247, 0.3);
-  border-radius: 4px;
+  background: rgba(168, 85, 247, 0.35);
+  border-radius: 12px;
+  transition: background 0.3s ease;
 }
 
 .cash-page::-webkit-scrollbar-thumb:hover {
-  background: rgba(168, 85, 247, 0.5);
+  background: rgba(168, 85, 247, 0.6);
 }
 
-/* Premium Background Effects */
-.cash-page::before {
-  content: '';
+/* ===== ENHANCED COOL BACKGROUND ===== */
+.cash-bg {
   position: fixed;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: 
-    radial-gradient(ellipse at 20% 50%, rgba(168, 85, 247, 0.04) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(75, 255, 155, 0.02) 0%, transparent 40%),
-    radial-gradient(ellipse at 50% 80%, rgba(168, 85, 247, 0.03) 0%, transparent 50%);
-  animation: bgFloat 20s ease-in-out infinite;
+  inset: 0;
   pointer-events: none;
   z-index: 0;
+  overflow: hidden;
+  background: 
+    radial-gradient(ellipse 1200px 700px at 10% 20%, rgba(120, 50, 200, 0.08), transparent 60%),
+    radial-gradient(ellipse 900px 600px at 90% 80%, rgba(0, 200, 255, 0.04), transparent 50%),
+    radial-gradient(ellipse 600px 600px at 50% 50%, rgba(168, 85, 247, 0.02), transparent 70%),
+    #080a11;
 }
 
-@keyframes bgFloat {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(2%, -2%) scale(1.02); }
-  66% { transform: translate(-2%, 2%) scale(0.98); }
+/* Orbital rings */
+.cash-bg .ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(168, 85, 247, 0.05);
+  animation: ringSpin linear infinite;
+  opacity: 0.5;
 }
 
+.cash-bg .ring.r1 {
+  width: 600px;
+  height: 600px;
+  top: 5%;
+  left: -10%;
+  animation-duration: 50s;
+  border-color: rgba(168, 85, 247, 0.08);
+}
+
+.cash-bg .ring.r2 {
+  width: 800px;
+  height: 800px;
+  bottom: -20%;
+  right: -15%;
+  animation-duration: 70s;
+  border-color: rgba(75, 200, 255, 0.04);
+}
+
+.cash-bg .ring.r3 {
+  width: 350px;
+  height: 350px;
+  top: 40%;
+  left: 60%;
+  animation-duration: 35s;
+  border-color: rgba(200, 150, 255, 0.06);
+  border-width: 2px;
+}
+
+.cash-bg .ring.r4 {
+  width: 200px;
+  height: 200px;
+  bottom: 30%;
+  left: 5%;
+  animation-duration: 25s;
+  border-color: rgba(100, 200, 255, 0.05);
+  border-style: dashed;
+}
+
+@keyframes ringSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Floating orbs */
+.cash-bg .orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(1px);
+  animation: orbFloat var(--dur) ease-in-out infinite alternate;
+  opacity: 0.3;
+}
+
+.cash-bg .orb.o1 {
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle, #A855F7, transparent);
+  top: 15%;
+  left: 20%;
+  --dur: 12s;
+  box-shadow: 0 0 30px rgba(168, 85, 247, 0.2);
+}
+
+.cash-bg .orb.o2 {
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle, #4bff9b, transparent);
+  bottom: 25%;
+  right: 10%;
+  --dur: 18s;
+  box-shadow: 0 0 40px rgba(75, 255, 155, 0.08);
+}
+
+.cash-bg .orb.o3 {
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(circle, #6495ed, transparent);
+  top: 55%;
+  left: 5%;
+  --dur: 10s;
+  box-shadow: 0 0 25px rgba(100, 149, 237, 0.15);
+}
+
+.cash-bg .orb.o4 {
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.15), transparent);
+  top: 70%;
+  left: 70%;
+  --dur: 22s;
+  filter: blur(6px);
+}
+
+.cash-bg .orb.o5 {
+  width: 10px;
+  height: 10px;
+  background: radial-gradient(circle, #f0b400, transparent);
+  top: 10%;
+  right: 25%;
+  --dur: 14s;
+  box-shadow: 0 0 30px rgba(240, 180, 0, 0.05);
+}
+
+@keyframes orbFloat {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(30px, -50px) scale(1.3); }
+}
+
+/* Animated grid */
+.cash-bg .grid {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(168, 85, 247, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(168, 85, 247, 0.02) 1px, transparent 1px);
+  background-size: 70px 70px;
+  opacity: 0.4;
+  animation: gridPulse 8s ease-in-out infinite;
+}
+
+@keyframes gridPulse {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.5; }
+}
+
+/* Scan line */
+.cash-bg .scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.06), rgba(75, 255, 155, 0.06), transparent);
+  animation: scanMove 18s linear infinite;
+  opacity: 0.4;
+}
+
+@keyframes scanMove {
+  0% { top: -2px; }
+  100% { top: 100%; }
+}
+
+/* Sparkles */
+.cash-bg .sparkle-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.cash-bg .sparkle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(168, 85, 247, 0.15);
+  width: var(--size);
+  height: var(--size);
+  left: var(--x);
+  top: var(--y);
+  animation: sparkleFloat 6s ease-in-out infinite;
+  animation-delay: var(--delay);
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.05);
+}
+
+@keyframes sparkleFloat {
+  0%, 100% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 0.6; transform: scale(1.2); }
+}
+
+/* ===== CONTAINER ===== */
 .cash-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -105,9 +274,10 @@
 }
 
 .cash-header h1::before {
-  content: '💎';
+  content: '◈';
   -webkit-text-fill-color: initial;
   font-size: 24px;
+  color: rgba(168, 85, 247, 0.4);
 }
 
 .cash-header-actions {
@@ -578,7 +748,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 400px;
+  max-height: 350px;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(168, 85, 247, 0.15) transparent;
@@ -596,6 +766,10 @@
 .transaction-list::-webkit-scrollbar-thumb {
   background: rgba(168, 85, 247, 0.15);
   border-radius: 4px;
+}
+
+.transaction-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(168, 85, 247, 0.25);
 }
 
 .transaction-item {
@@ -1058,6 +1232,7 @@
   margin-top: 4px;
 }
 
+/* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
   .balance-overview {
     grid-template-columns: repeat(2, 1fr);
@@ -1070,8 +1245,16 @@
 
 @media (max-width: 768px) {
   .cash-page {
-    padding: 16px 16px 16px 0;
-    height: calc(100vh - 70px);
+    padding: 16px 16px 30px 16px;
+    height: 100vh;
+  }
+  
+  .cash-bg .ring {
+    display: none;
+  }
+  
+  .cash-bg .orb {
+    opacity: 0.15;
   }
   
   .cash-header {
@@ -1083,10 +1266,6 @@
   
   .cash-header h1 {
     font-size: 22px;
-  }
-  
-  .cash-header h1::before {
-    font-size: 20px;
   }
   
   .currency-select {
@@ -1179,4 +1358,10 @@
   .setting-item {
     padding: 16px 18px;
   }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
