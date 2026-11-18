@@ -37,4 +37,7 @@ __pycache__/
 /data/regimes/
 /data/score_history.db*
 /data/news_intelligence.db*
+/data/research_journal.db*
+/data/audit.db*
+/data/pipeline.db*
 /artifacts/cross_sectional/*/walk_forward_scores.csv

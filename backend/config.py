@@ -30,6 +30,10 @@ class Settings:
     score_history_db_path: str = "data/score_history.db"
     news_intelligence_db_path: str = "data/news_intelligence.db"
     historical_feature_path: str = "data/features/cross_sectional.parquet"
+    research_journal_db_path: str = "data/research_journal.db"
+    audit_db_path: str = "data/audit.db"
+    pipeline_db_path: str = "data/pipeline.db"
+    redis_url: str = ""
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -52,4 +56,8 @@ class Settings:
             score_history_db_path=os.getenv("NEXORA_SCORE_HISTORY_DB", "data/score_history.db"),
             news_intelligence_db_path=os.getenv("NEXORA_NEWS_INTELLIGENCE_DB", "data/news_intelligence.db"),
             historical_feature_path=os.getenv("NEXORA_HISTORICAL_FEATURE_PATH", "data/features/cross_sectional.parquet"),
+            research_journal_db_path=os.getenv("NEXORA_RESEARCH_JOURNAL_DB", "data/research_journal.db"),
+            audit_db_path=os.getenv("NEXORA_AUDIT_DB", "data/audit.db"),
+            pipeline_db_path=os.getenv("NEXORA_PIPELINE_DB", "data/pipeline.db"),
+            redis_url=os.getenv("REDIS_URL", ""),
         )
