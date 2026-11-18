@@ -27,6 +27,7 @@ class Settings:
     paper_commission: float = 0
     fred_api_key: str = ""
     regime_snapshot_root: str = "data/regimes"
+    score_history_db_path: str = "data/score_history.db"
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -46,4 +47,5 @@ class Settings:
             paper_commission=float(os.getenv("NEXORA_PAPER_COMMISSION", "0")),
             fred_api_key=os.getenv("FRED_API_KEY", ""),
             regime_snapshot_root=os.getenv("NEXORA_REGIME_SNAPSHOT_ROOT", "data/regimes"),
+            score_history_db_path=os.getenv("NEXORA_SCORE_HISTORY_DB", "data/score_history.db"),
         )

@@ -39,6 +39,7 @@ def score_stock(symbol: str):
         score["regime_adjustment"] = adjustment
     except ApiError as error:
         score["regime_adjustment"] = {"status":"unavailable","reason":error.code}
+    current_app.extensions["score_history"].record(normalized,score)
     return jsonify({
         "symbol": normalized,
         "name": company_name or normalized,
