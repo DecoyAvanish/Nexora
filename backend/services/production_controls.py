@@ -7,8 +7,8 @@ from flask import g,request
 from backend.errors import ApiError
 
 class ProductionControls:
-    def __init__(self,db_path="data/audit.db",requests_per_minute=120,mutations_per_minute=30):
-        self.path=Path(db_path);self.path.parent.mkdir(parents=True,exist_ok=True);self.limit=requests_per_minute;self.mutation_limit=mutations_per_minute;self.windows=defaultdict(deque);self.lock=Lock()
+    def __init__(self,db_path="data/audit.db",requests_per_minute=120,mutations_per_minute=30,observability=None):
+        self.path=Path(db_path);self.path.parent.mkdir(parents=True,exist_ok=True);self.limit=requests_per_minute;self.mutation_limit=mutations_per_minute;self.windows=defaultdict(deque);self.lock=Lock();self.observability=observability
         with self._connect() as db:db.execute("CREATE TABLE IF NOT EXISTS audit_log(id TEXT PRIMARY KEY,request_id TEXT NOT NULL,method TEXT NOT NULL,path TEXT NOT NULL,actor TEXT,ip TEXT,status INTEGER,duration_ms REAL,created_at TEXT NOT NULL,metadata TEXT NOT NULL)")
     def _connect(self):return sqlite3.connect(self.path)
     def before(self):
@@ -20,6 +20,8 @@ class ProductionControls:
             window.append(now)
     def after(self,response):
         response.headers["X-Request-ID"]=g.get("request_id","");response.headers["X-Content-Type-Options"]="nosniff";response.headers["Referrer-Policy"]="strict-origin-when-cross-origin"
+        if self.observability:
+            self.observability.increment("api_total");self.observability.increment("api_errors",response.status_code>=400);self.observability.observe("request",(time.monotonic()-g.get("started",time.monotonic()))*1000)
         if request.method!="OPTIONS":
             duration=(time.monotonic()-g.get("started",time.monotonic()))*1000;actor=request.headers.get("X-Nexora-Dev-User") if request.method!="GET" else None
             try:

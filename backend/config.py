@@ -34,6 +34,7 @@ class Settings:
     audit_db_path: str = "data/audit.db"
     pipeline_db_path: str = "data/pipeline.db"
     redis_url: str = ""
+    observability_db_path: str = "data/observability.db"
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -60,4 +61,5 @@ class Settings:
             audit_db_path=os.getenv("NEXORA_AUDIT_DB", "data/audit.db"),
             pipeline_db_path=os.getenv("NEXORA_PIPELINE_DB", "data/pipeline.db"),
             redis_url=os.getenv("REDIS_URL", ""),
+            observability_db_path=os.getenv("NEXORA_OBSERVABILITY_DB", "data/observability.db"),
         )

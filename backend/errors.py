@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flask import Flask, jsonify, g
+from flask import Flask, jsonify, g, current_app, request
 from werkzeug.exceptions import HTTPException
 
 
@@ -26,4 +26,5 @@ def register_error_handlers(app: Flask) -> None:
     @app.errorhandler(Exception)
     def handle_unexpected_error(error: Exception):
         app.logger.exception("Unhandled API error", exc_info=error)
+        if current_app.extensions.get("observability"):current_app.extensions["observability"].error(error,g.get("request_id"),request.path)
         return jsonify({"error": {"code": "internal_error", "message": "The server could not complete the request.", "request_id": g.get("request_id")}}), 500

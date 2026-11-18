@@ -1,6 +1,7 @@
 """Explainable AI stock score routes."""
 
 from flask import Blueprint, current_app, jsonify, request
+import time
 
 from backend.services.market_data import normalize_symbol
 from backend.errors import ApiError
@@ -10,6 +11,7 @@ scoring_blueprint = Blueprint("scoring", __name__)
 
 @scoring_blueprint.get("/score/<symbol>")
 def score_stock(symbol: str):
+    inference_started=time.monotonic()
     normalized = normalize_symbol(symbol)
     company_name = request.args.get("company")
     history = current_app.extensions["market_data"].history(normalized, period="1y")
@@ -47,7 +49,7 @@ def score_stock(symbol: str):
     except ApiError as error:
         score["regime_adjustment"] = {"status":"unavailable","reason":error.code}
     current_app.extensions["score_history"].record(normalized,score)
-    return jsonify({
+    response=jsonify({
         "symbol": normalized,
         "name": company_name or normalized,
         "last_price": history.last_price,
@@ -60,3 +62,6 @@ def score_stock(symbol: str):
         "score_source": score_source,
         **score,
     })
+    current_app.extensions["observability"].observe("model_inference",(time.monotonic()-inference_started)*1000)
+    current_app.extensions["observability"].mark_freshness("model_score",score.get("data_through"),{"symbol":normalized,"model_version":score.get("model_version")})
+    return response

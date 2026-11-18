@@ -40,4 +40,5 @@ __pycache__/
 /data/research_journal.db*
 /data/audit.db*
 /data/pipeline.db*
+/data/observability.db*
 /artifacts/cross_sectional/*/walk_forward_scores.csv

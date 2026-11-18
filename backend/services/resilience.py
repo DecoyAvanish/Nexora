@@ -6,8 +6,8 @@ from backend.errors import ApiError
 from backend.services.news import NewsArticle
 
 class ResilienceManager:
-    def __init__(self,redis_url="",failure_threshold=3,open_seconds=60):
-        self.redis=None;self.memory={};self.windows=defaultdict(deque);self.circuits=defaultdict(lambda:{"failures":0,"open_until":0});self.lock=Lock();self.failure_threshold=failure_threshold;self.open_seconds=open_seconds
+    def __init__(self,redis_url="",failure_threshold=3,open_seconds=60,observability=None):
+        self.redis=None;self.memory={};self.windows=defaultdict(deque);self.circuits=defaultdict(lambda:{"failures":0,"open_until":0});self.lock=Lock();self.failure_threshold=failure_threshold;self.open_seconds=open_seconds;self.observability=observability
         if redis_url:
             try:
                 import redis
@@ -15,20 +15,28 @@ class ResilienceManager:
             except Exception:self.redis=None
     def execute(self,provider,key,loader,fresh_seconds=300,stale_seconds=3600,rate_per_minute=60,retries=2):
         cached=self._get(key);now=time.time()
-        if cached and cached["fresh_until"]>now:return cached["value"],{"cache":"fresh","stale":False,"provider":provider}
+        if cached and cached["fresh_until"]>now:
+            if self.observability:self.observability.increment("cache_hit")
+            return cached["value"],{"cache":"fresh","stale":False,"provider":provider}
         circuit=self.circuits[provider]
         if circuit["open_until"]>now:
-            if cached and cached["stale_until"]>now:return cached["value"],{"cache":"stale","stale":True,"provider":provider,"reason":"provider_circuit_open"}
+            if cached and cached["stale_until"]>now:
+                if self.observability:self.observability.increment("cache_stale")
+                return cached["value"],{"cache":"stale","stale":True,"provider":provider,"reason":"provider_circuit_open"}
             raise ApiError(f"{provider} circuit is temporarily open.",503,"provider_circuit_open")
         self._throttle(provider,rate_per_minute)
         for attempt in range(retries+1):
             try:
-                value=loader();self._set(key,value,fresh_seconds,stale_seconds);circuit["failures"]=0;return value,{"cache":"miss","stale":False,"provider":provider,"retry_count":attempt}
+                started=time.monotonic();value=loader();self._set(key,value,fresh_seconds,stale_seconds);circuit["failures"]=0
+                if self.observability:self.observability.increment("cache_miss");self.observability.observe(f"provider:{provider}",(time.monotonic()-started)*1000);self.observability.mark_freshness(provider)
+                return value,{"cache":"miss","stale":False,"provider":provider,"retry_count":attempt}
             except Exception as error:
                 circuit["failures"]+=1
                 if circuit["failures"]>=self.failure_threshold:circuit["open_until"]=time.time()+self.open_seconds
                 if attempt<retries:time.sleep(min(.1*(2**attempt)+random.random()*.1,1));continue
-                if cached and cached["stale_until"]>now:return cached["value"],{"cache":"stale","stale":True,"provider":provider,"reason":type(error).__name__}
+                if cached and cached["stale_until"]>now:
+                    if self.observability:self.observability.increment("cache_stale")
+                    return cached["value"],{"cache":"stale","stale":True,"provider":provider,"reason":type(error).__name__}
                 raise
     def _throttle(self,provider,limit):
         now=time.time()
