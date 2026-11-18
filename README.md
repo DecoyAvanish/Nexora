@@ -69,6 +69,16 @@ Errors use a consistent shape:
 CI=true npm test -- --watchAll=false
 ```
 
+## Cross-sectional model training
+
+The live score works immediately from technical factors and real FinBERT news sentiment. For a true market-relative decile model, prepare a point-in-time CSV or Parquet dataset with `date`, `ticker`, `fwd_ret_63d`, `bench_ret_63d`, and numeric feature columns, then run:
+
+```bash
+.venv/bin/python -m backend.training.cross_sectional data/features.parquet
+```
+
+The trainer ranks every feature cross-sectionally by date, applies a 63-trading-day embargo, runs walk-forward LightGBM folds, and exports the model, out-of-sample scores, AUC, information coefficient, and top-versus-bottom-decile return spread. Do not train it on restated or survivorship-biased data.
+
 ## Security notes
 
 - Keep `.env` and Firebase service credentials out of Git.
