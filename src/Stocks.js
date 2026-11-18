@@ -4,11 +4,9 @@ import './Stocks.css';
 import { 
   database, 
   doc, 
-  getDoc, 
   updateDoc, 
   arrayUnion,
   arrayRemove,
-  increment,
   onSnapshot,
   auth
 } from './firebase';
@@ -60,6 +58,8 @@ function Stocks() {
   const [watchlist, setWatchlist] = useState([]);
   const [orderType, setOrderType] = useState('market');
   const [orderQuantity, setOrderQuantity] = useState(1);
+  const [limitPrice, setLimitPrice] = useState('');
+  const [stopPrice, setStopPrice] = useState('');
   const [orderSide, setOrderSide] = useState('buy');
   const [userCash, setUserCash] = useState(10000);
   const [userHoldings, setUserHoldings] = useState([]);
@@ -68,6 +68,14 @@ function Stocks() {
   const [fundamentals, setFundamentals] = useState(null);
 
   const searchTimeout = useRef(null);
+
+  const authHeaders = async () => ({ Authorization: `Bearer ${await auth.currentUser.getIdToken()}` });
+  const refreshPaperAccount = async () => {
+    if (!auth.currentUser) return;
+    const { data } = await axios.get(`${API_BASE}/paper/account`, { headers: await authHeaders() });
+    setUserCash(data.cash); setUserHoldings(data.positions.map((position) => ({ symbol: position.symbol, shares: position.quantity, avgPrice: position.average_cost, lastPrice: position.market_price })));
+    setPortfolioValue(data.portfolio_value);
+  };
 
   // Load user's portfolio and watchlist
   useEffect(() => {
@@ -78,22 +86,10 @@ function Stocks() {
     const unsubscribe = onSnapshot(userRef, (doc) => {
       if (doc.exists()) {
         const data = doc.data();
-        const holdings = data.portfolio?.holdings || [];
-        const cash = data.portfolio?.cash || 10000;
-        
-        setUserHoldings(holdings);
-        setUserCash(cash);
         setWatchlist(data.watchlist || []);
-        
-        // Calculate portfolio value
-        let totalValue = cash;
-        holdings.forEach(h => {
-          const price = h.lastPrice || h.avgPrice || 0;
-          totalValue += price * (h.shares || 0);
-        });
-        setPortfolioValue(totalValue);
       }
     });
+    refreshPaperAccount().catch(() => setError('Paper account is temporarily unavailable.'));
 
     return () => unsubscribe();
   }, []);
@@ -162,163 +158,23 @@ function Stocks() {
     }
   };
 
-  const buyStock = async () => {
-    if (!stockData || !auth.currentUser) {
-      setError('Please log in to buy stocks');
-      return;
-    }
-
-    const totalCost = stockData.last_price * orderQuantity;
-    
-    if (totalCost > userCash) {
-      setError(`Insufficient cash. You need $${totalCost.toFixed(2)} but have $${userCash.toFixed(2)}`);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    setOrderSuccess(null);
-
-    try {
-      const userRef = doc(database, 'users', auth.currentUser.uid);
-      const userDoc = await getDoc(userRef);
-      
-      if (!userDoc.exists()) {
-        throw new Error('User document not found');
-      }
-
-      const userData = userDoc.data();
-      const currentHoldings = userData.portfolio?.holdings || [];
-      
-      const existingHolding = currentHoldings.find(h => h.symbol === stockData.symbol);
-      
-      let updatedHoldings;
-      if (existingHolding) {
-        updatedHoldings = currentHoldings.map(h => {
-          if (h.symbol === stockData.symbol) {
-            const newShares = h.shares + orderQuantity;
-            const newAvgPrice = ((h.avgPrice * h.shares) + (stockData.last_price * orderQuantity)) / newShares;
-            return {
-              ...h,
-              shares: newShares,
-              avgPrice: newAvgPrice,
-              lastPrice: stockData.last_price
-            };
-          }
-          return h;
-        });
-      } else {
-        updatedHoldings = [
-          ...currentHoldings,
-          {
-            symbol: stockData.symbol,
-            shares: orderQuantity,
-            avgPrice: stockData.last_price,
-            lastPrice: stockData.last_price,
-            name: stockData.name || stockData.symbol,
-            purchaseDate: new Date().toISOString()
-          }
-        ];
-      }
-
-      await updateDoc(userRef, {
-        'portfolio.cash': increment(-totalCost),
-        'portfolio.holdings': updatedHoldings
-      });
-
-      if (!watchlist.includes(stockData.symbol)) {
-        await updateDoc(userRef, {
-          watchlist: arrayUnion(stockData.symbol)
-        });
-        setWatchlist([...watchlist, stockData.symbol]);
-      }
-
-      setUserCash(userCash - totalCost);
-      setOrderSuccess(`✅ Bought ${orderQuantity} shares of ${stockData.symbol} for $${totalCost.toFixed(2)}`);
-      setOrderQuantity(1);
-
-    } catch (err) {
-      console.error('Buy error:', err);
-      setError(`Failed to buy: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const sellStock = async () => {
-    if (!stockData || !auth.currentUser) {
-      setError('Please log in to sell stocks');
-      return;
-    }
-
-    const userRef = doc(database, 'users', auth.currentUser.uid);
-    const userDoc = await getDoc(userRef);
-    
-    if (!userDoc.exists()) {
-      setError('User not found');
-      return;
-    }
-
-    const userData = userDoc.data();
-    const currentHoldings = userData.portfolio?.holdings || [];
-    const existingHolding = currentHoldings.find(h => h.symbol === stockData.symbol);
-    
-    if (!existingHolding) {
-      setError(`You don't own any shares of ${stockData.symbol}`);
-      return;
-    }
-
-    if (orderQuantity > existingHolding.shares) {
-      setError(`You only have ${existingHolding.shares} shares to sell`);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    setOrderSuccess(null);
-
-    try {
-      const totalValue = stockData.last_price * orderQuantity;
-      let updatedHoldings;
-      
-      if (orderQuantity === existingHolding.shares) {
-        updatedHoldings = currentHoldings.filter(h => h.symbol !== stockData.symbol);
-      } else {
-        updatedHoldings = currentHoldings.map(h => {
-          if (h.symbol === stockData.symbol) {
-            return {
-              ...h,
-              shares: h.shares - orderQuantity,
-              lastPrice: stockData.last_price
-            };
-          }
-          return h;
-        });
-      }
-
-      await updateDoc(userRef, {
-        'portfolio.cash': increment(totalValue),
-        'portfolio.holdings': updatedHoldings
-      });
-
-      setUserCash(userCash + totalValue);
-      setOrderSuccess(`✅ Sold ${orderQuantity} shares of ${stockData.symbol} for $${totalValue.toFixed(2)}`);
-      setOrderQuantity(1);
-
-    } catch (err) {
-      console.error('Sell error:', err);
-      setError(`Failed to sell: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const placeOrder = async () => {
-    if (orderSide === 'buy') {
-      await buyStock();
-    } else {
-      await sellStock();
-    }
+    if (!stockData || !auth.currentUser) return setError('Please log in to trade');
+    setLoading(true); setError(null); setOrderSuccess(null);
+    try {
+      const payload = {
+        symbol: stockData.symbol, side: orderSide, type: orderType,
+        quantity: Number(orderQuantity), client_order_id: crypto.randomUUID(),
+        ...(orderType.includes('limit') ? { limit_price: Number(limitPrice) } : {}),
+        ...(orderType.includes('stop') ? { stop_price: Number(stopPrice) } : {})
+      };
+      const { data } = await axios.post(`${API_BASE}/paper/orders`, payload, { headers: await authHeaders() });
+      if (data.status === 'rejected') throw new Error(data.rejection_reason.replaceAll('_', ' '));
+      setOrderSuccess(`${data.status === 'filled' ? '✅' : '⏳'} ${orderSide.toUpperCase()} ${orderQuantity} ${stockData.symbol} · ${data.status}`);
+      await refreshPaperAccount(); setOrderQuantity(1);
+    } catch (err) {
+      setError(err.response?.data?.error?.message || `Order failed: ${err.message}`);
+    } finally { setLoading(false); }
   };
 
   const toggleWatchlist = async (symbol) => {
@@ -699,16 +555,16 @@ function Stocks() {
           </div>
           <div className="order-controls">
             <div className="qty-control">
-              <button onClick={() => setOrderQuantity(Math.max(1, orderQuantity - 1))}>−</button>
+              <button onClick={() => setOrderQuantity(Math.max(0.001, Number(orderQuantity) - 1))}>−</button>
               <input 
                 type="number" 
                 value={orderQuantity} 
                 onChange={(e) => {
-                  const val = parseInt(e.target.value);
+                  const val = parseFloat(e.target.value);
                   const max = orderSide === 'sell' ? maxSellShares : 999;
-                  setOrderQuantity(Math.max(1, Math.min(val || 1, max)));
+                  setOrderQuantity(Math.max(0.001, Math.min(val || 0.001, max)));
                 }} 
-                min="1" 
+                min="0.001" step="0.001"
                 max={orderSide === 'sell' ? maxSellShares : 999}
               />
               <button onClick={() => {
@@ -720,8 +576,12 @@ function Stocks() {
               <option value="market">Market</option>
               <option value="limit">Limit</option>
               <option value="stop">Stop</option>
+              <option value="stop_limit">Stop limit</option>
             </select>
           </div>
+          {(orderType === 'limit' || orderType === 'stop_limit') && <input className="order-price-input" type="number" min="0.01" step="0.01" placeholder="Limit price" value={limitPrice} onChange={(event) => setLimitPrice(event.target.value)} />}
+          {(orderType === 'stop' || orderType === 'stop_limit') && <input className="order-price-input" type="number" min="0.01" step="0.01" placeholder="Stop price" value={stopPrice} onChange={(event) => setStopPrice(event.target.value)} />}
+          <div className="paper-safety">PAPER TRADING ONLY · server-validated execution</div>
           <div className="order-total">
             <span>Total</span>
             <span className="total-price">${totalCost.toFixed(2)}</span>

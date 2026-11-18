@@ -878,6 +878,8 @@ body {
 .filing-sources { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; padding-top:12px; border-top:1px solid var(--border-hair); }
 .filing-sources a { color:#a98bc5; font:9px var(--font-mono); text-decoration:none; }
 .filing-sources a:hover { color:#c084fc; }
+.order-price-input { width:100%; box-sizing:border-box; margin:8px 0 0; padding:11px 12px; border:1px solid var(--border-hair); border-radius:8px; background:rgba(255,255,255,.025); color:#f0edff; font:11px var(--font-mono); }
+.paper-safety { margin-top:10px; color:#4bff9b; opacity:.65; font:8px var(--font-mono); letter-spacing:1.4px; text-align:center; }
 
 .watchlist-header {
   display: flex;
