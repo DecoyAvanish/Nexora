@@ -33,4 +33,6 @@ __pycache__/
 /data/features/
 /data/sec_cache/
 /data/paper_trading.db*
+/data/fred_cache/
+/data/regimes/
 /artifacts/cross_sectional/*/walk_forward_scores.csv

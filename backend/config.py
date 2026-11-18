@@ -25,6 +25,8 @@ class Settings:
     paper_starting_cash: float = 100000
     paper_slippage_bps: float = 5
     paper_commission: float = 0
+    fred_api_key: str = ""
+    regime_snapshot_root: str = "data/regimes"
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -42,4 +44,6 @@ class Settings:
             paper_starting_cash=float(os.getenv("NEXORA_PAPER_STARTING_CASH", "100000")),
             paper_slippage_bps=float(os.getenv("NEXORA_PAPER_SLIPPAGE_BPS", "5")),
             paper_commission=float(os.getenv("NEXORA_PAPER_COMMISSION", "0")),
+            fred_api_key=os.getenv("FRED_API_KEY", ""),
+            regime_snapshot_root=os.getenv("NEXORA_REGIME_SNAPSHOT_ROOT", "data/regimes"),
         )
