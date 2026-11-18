@@ -79,6 +79,17 @@ The live score works immediately from technical factors and real FinBERT news se
 
 The trainer ranks every feature cross-sectionally by date, applies a 63-trading-day embargo, runs walk-forward LightGBM folds, and exports the model, out-of-sample scores, AUC, information coefficient, and top-versus-bottom-decile return spread. Do not train it on restated or survivorship-biased data.
 
+Build the daily S&P 500 feature and label dataset first:
+
+```bash
+.venv/bin/python -m backend.training.dataset \
+  --start 2018-01-01 \
+  --refresh-universe \
+  --output data/features/cross_sectional.parquet
+```
+
+This stores 5/21/63/126/252-day returns, volatility, trend, RSI, drawdown, and volume factors; forward 63-trading-day stock and SPY returns; and both universe-relative and sector-relative percentile ranks for each date.
+
 ## Security notes
 
 - Keep `.env` and Firebase service credentials out of Git.
