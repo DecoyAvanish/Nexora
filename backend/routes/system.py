@@ -12,6 +12,5 @@ def health():
         "status": "ok",
         "service": "nexora-api",
         "environment": settings.environment,
-        "market_data_configured": bool(settings.finnhub_api_key),
         "prediction_artifacts_available": current_app.extensions["prediction"].artifacts_available,
     })

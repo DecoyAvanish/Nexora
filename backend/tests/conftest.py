@@ -10,7 +10,7 @@ class FakePrediction:
 
 @pytest.fixture()
 def settings():
-    return Settings("test", "127.0.0.1", 5001, ("http://localhost:3000",), None, 1)
+    return Settings("test", "127.0.0.1", 5001, ("http://localhost:3000",), 1)
 
 
 @pytest.fixture()

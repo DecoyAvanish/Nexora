@@ -16,7 +16,6 @@ class Settings:
     host: str
     port: int
     allowed_origins: tuple[str, ...]
-    finnhub_api_key: str | None
     request_timeout_seconds: float
 
     @classmethod
@@ -26,6 +25,5 @@ class Settings:
             host=os.getenv("NEXORA_HOST", "127.0.0.1"),
             port=int(os.getenv("NEXORA_PORT", "5001")),
             allowed_origins=_csv(os.getenv("NEXORA_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")),
-            finnhub_api_key=os.getenv("FINNHUB_API_KEY") or None,
             request_timeout_seconds=float(os.getenv("NEXORA_REQUEST_TIMEOUT", "10")),
         )
