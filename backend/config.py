@@ -29,6 +29,7 @@ class Settings:
     regime_snapshot_root: str = "data/regimes"
     score_history_db_path: str = "data/score_history.db"
     news_intelligence_db_path: str = "data/news_intelligence.db"
+    historical_feature_path: str = "data/features/cross_sectional.parquet"
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -50,4 +51,5 @@ class Settings:
             regime_snapshot_root=os.getenv("NEXORA_REGIME_SNAPSHOT_ROOT", "data/regimes"),
             score_history_db_path=os.getenv("NEXORA_SCORE_HISTORY_DB", "data/score_history.db"),
             news_intelligence_db_path=os.getenv("NEXORA_NEWS_INTELLIGENCE_DB", "data/news_intelligence.db"),
+            historical_feature_path=os.getenv("NEXORA_HISTORICAL_FEATURE_PATH", "data/features/cross_sectional.parquet"),
         )

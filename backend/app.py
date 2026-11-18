@@ -19,6 +19,7 @@ from .routes.regime import regime_blueprint
 from .routes.events import events_blueprint
 from .routes.news_intelligence import news_intelligence_blueprint
 from .routes.explainability import explainability_blueprint
+from .routes.research import research_blueprint
 from .routes.system import system_blueprint
 from .services.market_data import MarketDataService
 from .services.news import NewsService
@@ -37,6 +38,9 @@ from .services.score_history import ScoreHistoryService
 from .services.event_intelligence import EventIntelligenceService
 from .services.news_intelligence import NewsIntelligenceService
 from .services.explainability import ExplainabilityService
+from .services.historical_research import HistoricalResearchService
+from .services.portfolio_optimization import PortfolioOptimizationService
+from .services.watchlist_intelligence import WatchlistIntelligenceService
 from .services.prediction import PredictionService
 
 
@@ -63,6 +67,9 @@ def create_app(settings: Settings | None = None, *, market_data=None, prediction
     app.extensions["event_intelligence"] = EventIntelligenceService(app.extensions["news"],app.extensions["sentiment"],app.extensions["sec_edgar"],app.extensions["market_data"],app.extensions["score_history"],app.extensions["paper_execution"])
     app.extensions["news_intelligence"] = NewsIntelligenceService(app.extensions["news"],app.extensions["sentiment"],resolved_settings.news_intelligence_db_path)
     app.extensions["explainability"] = ExplainabilityService(app.extensions["cross_sectional"],app.extensions["fundamental_analysis"],app.extensions["news_intelligence"],app.extensions["market_data"],app.extensions["score_history"])
+    app.extensions["historical_research"] = HistoricalResearchService(resolved_settings.model_artifact_root,resolved_settings.historical_feature_path)
+    app.extensions["portfolio_optimization"] = PortfolioOptimizationService(app.extensions["market_data"],app.extensions["cross_sectional"])
+    app.extensions["watchlist_intelligence"] = WatchlistIntelligenceService(app.extensions["cross_sectional"],app.extensions["score_history"],app.extensions["news_intelligence"],app.extensions["event_intelligence"],app.extensions["market_data"],app.extensions["market_regime"])
     app.register_blueprint(system_blueprint, url_prefix="/api")
     app.register_blueprint(market_blueprint, url_prefix="/api")
     app.register_blueprint(news_blueprint, url_prefix="/api")
@@ -76,6 +83,7 @@ def create_app(settings: Settings | None = None, *, market_data=None, prediction
     app.register_blueprint(events_blueprint, url_prefix="/api")
     app.register_blueprint(news_intelligence_blueprint, url_prefix="/api")
     app.register_blueprint(explainability_blueprint, url_prefix="/api")
+    app.register_blueprint(research_blueprint, url_prefix="/api")
 
     @app.get("/")
     def index():
