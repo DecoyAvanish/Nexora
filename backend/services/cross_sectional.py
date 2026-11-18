@@ -82,6 +82,21 @@ class CrossSectionalScoreService:
             "methodology": {"relative_decile": True, "probability_calibrated": True, "embargo_trading_days": 63},
         }
 
+    def explain(self, raw_symbol: str) -> dict[str, Any]:
+        symbol=normalize_symbol(raw_symbol); self._load()
+        if symbol not in self._scores.index: raise ApiError(f"{symbol} is not in the current production universe.",404,"symbol_not_in_universe")
+        row=self._scores.loc[symbol]; row=row.iloc[-1] if isinstance(row,pd.DataFrame) else row
+        try:
+            values=self._bundle.contributions(pd.DataFrame([row]))[0]; baseline=float(values[-1]); items=[]
+            for name,value in zip(self._bundle.feature_columns,values[:-1]):
+                category="sentiment" if "sentiment" in name else "fundamental" if any(term in name for term in ("revenue","margin","roe","roic","debt","earnings","valuation","cash_flow")) else "technical"
+                feature_value=row.get(name)
+                items.append({"feature":name,"label":name.replace("_"," ").title(),"value":float(value),"feature_value":float(feature_value) if pd.notna(feature_value) else None,"direction":"positive" if value>=0 else "negative","category":category,"scope":"sector_relative" if name.endswith("_sector_rank") else "universe_relative"})
+            items.sort(key=lambda item:abs(item["value"]),reverse=True)
+            return {"baseline":baseline,"waterfall":items,"top_positive":[item for item in items if item["value"]>0][:6],"top_negative":[item for item in items if item["value"]<0][:6]}
+        except Exception:
+            return {"baseline":None,"waterfall":[],"top_positive":[],"top_negative":[]}
+
     def _top_drivers(self, row: pd.Series) -> list[dict[str, Any]]:
         try:
             frame = pd.DataFrame([row])
