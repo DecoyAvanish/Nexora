@@ -37,7 +37,7 @@ class Settings:
             model_artifact_root=os.getenv("NEXORA_MODEL_ARTIFACT_ROOT", "artifacts/cross_sectional"),
             sec_user_agent=os.getenv("SEC_USER_AGENT", "Nexora research avanishpakalapati@gmail.com"),
             sec_reporting_lag_hours=int(os.getenv("SEC_REPORTING_LAG_HOURS", "24")),
-            firebase_web_api_key=os.getenv("FIREBASE_WEB_API_KEY", ""),
+            firebase_web_api_key=os.getenv("FIREBASE_WEB_API_KEY", os.getenv("REACT_APP_FIREBASE_API_KEY", "AIzaSyAil3clxr5vGlTNpC7qux7s8kUEt2mC-Fk")),
             paper_db_path=os.getenv("NEXORA_PAPER_DB", "data/paper_trading.db"),
             paper_starting_cash=float(os.getenv("NEXORA_PAPER_STARTING_CASH", "100000")),
             paper_slippage_bps=float(os.getenv("NEXORA_PAPER_SLIPPAGE_BPS", "5")),
