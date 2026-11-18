@@ -523,6 +523,22 @@ function Stocks() {
               ).join(' • ')}
             </div>
           )}
+          {stockData.regime_adjustment?.regime && (
+            <div className={`regime-explanation regime-${stockData.regime_adjustment.regime.state}`}>
+              <div className="regime-title">
+                <span>MARKET REGIME</span>
+                <strong>{stockData.regime_adjustment.regime.label}</strong>
+                <em>{(stockData.regime_adjustment.regime.confidence * 100).toFixed(0)}% confidence</em>
+              </div>
+              <p>{stockData.regime_adjustment.explanation}</p>
+              <div className="regime-factors">
+                {Object.entries(stockData.regime_adjustment.regime.features).slice(0, 8).map(([name,value]) => (
+                  <span key={name}>{name.replaceAll('_',' ')} <b>{typeof value === 'number' ? value.toFixed(2) : 'N/A'}</b></span>
+                ))}
+              </div>
+              <small>Point-in-time macro vintage: {stockData.regime_adjustment.regime.as_of} · FRED/ALFRED + SPY/RSP breadth</small>
+            </div>
+          )}
           {stockData.sentiment?.articles?.length > 0 && (
             <div className="prediction-note">
               Latest news: {stockData.sentiment.articles.slice(0, 3).map((article, index) => (
