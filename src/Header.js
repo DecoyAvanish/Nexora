@@ -12,6 +12,7 @@ function Header({ onNavigate, currentPage, user, onLogout }) {
     { id: 'modelLab', label: 'Model Lab' },
     { id: 'modelCard', label: 'Model Card' },
     { id: 'architecture', label: 'Architecture' },
+    { id: 'status', label: 'Status' },
     { id: 'demo', label: 'Demo' },
   ];
 
