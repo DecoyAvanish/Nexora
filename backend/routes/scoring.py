@@ -3,6 +3,7 @@
 from flask import Blueprint, current_app, jsonify, request
 
 from backend.services.market_data import normalize_symbol
+from backend.errors import ApiError
 
 scoring_blueprint = Blueprint("scoring", __name__)
 
@@ -31,6 +32,13 @@ def score_stock(symbol: str):
         })
         score_source = "fallback_composite"
     previous = history.closes[-2] if len(history.closes) > 1 else history.last_price
+    try:
+        adjustment = current_app.extensions["market_regime"].adjust_score(score, history)
+        score["ai_score"] = adjustment.pop("display_score")
+        score["signal"] = current_app.extensions["scoring"]._signal(score["ai_score"])
+        score["regime_adjustment"] = adjustment
+    except ApiError as error:
+        score["regime_adjustment"] = {"status":"unavailable","reason":error.code}
     return jsonify({
         "symbol": normalized,
         "name": company_name or normalized,
