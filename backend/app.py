@@ -7,15 +7,21 @@ from flask_cors import CORS
 
 from .config import Settings
 from .errors import register_error_handlers
+from .routes.market import market_blueprint
 from .routes.system import system_blueprint
+from .services.market_data import MarketDataService
+from .services.prediction import PredictionService
 
 
-def create_app(settings: Settings | None = None) -> Flask:
+def create_app(settings: Settings | None = None, *, market_data=None, prediction=None) -> Flask:
     app = Flask(__name__)
     resolved_settings = settings or Settings.from_env()
     app.config["SETTINGS"] = resolved_settings
     CORS(app, resources={r"/api/*": {"origins": list(resolved_settings.allowed_origins)}})
+    app.extensions["market_data"] = market_data or MarketDataService(resolved_settings.request_timeout_seconds)
+    app.extensions["prediction"] = prediction or PredictionService()
     app.register_blueprint(system_blueprint, url_prefix="/api")
+    app.register_blueprint(market_blueprint, url_prefix="/api")
 
     @app.get("/")
     def index():

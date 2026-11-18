@@ -6,6 +6,7 @@ def test_health_endpoint(client):
         "service": "nexora-api",
         "environment": "test",
         "market_data_configured": False,
+        "prediction_artifacts_available": True,
     }
 
 
