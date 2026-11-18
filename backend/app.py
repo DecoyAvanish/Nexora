@@ -21,10 +21,11 @@ from .services.scoring import StockScoringService
 from .services.cross_sectional import CrossSectionalScoreService
 from .services.model_lab import ModelLabService
 from .services.sec_edgar import SecEdgarService
+from .services.fundamental_analysis import FundamentalAnalysisService
 from .services.prediction import PredictionService
 
 
-def create_app(settings: Settings | None = None, *, market_data=None, prediction=None, news=None, sentiment=None, scoring=None, cross_sectional=None, model_lab=None, sec_edgar=None) -> Flask:
+def create_app(settings: Settings | None = None, *, market_data=None, prediction=None, news=None, sentiment=None, scoring=None, cross_sectional=None, model_lab=None, sec_edgar=None, fundamental_analysis=None) -> Flask:
     app = Flask(__name__)
     resolved_settings = settings or Settings.from_env()
     app.config["SETTINGS"] = resolved_settings
@@ -37,6 +38,7 @@ def create_app(settings: Settings | None = None, *, market_data=None, prediction
     app.extensions["cross_sectional"] = cross_sectional or CrossSectionalScoreService(resolved_settings.model_artifact_root)
     app.extensions["model_lab"] = model_lab or ModelLabService(resolved_settings.model_artifact_root)
     app.extensions["sec_edgar"] = sec_edgar or SecEdgarService(resolved_settings.sec_user_agent, resolved_settings.request_timeout_seconds, reporting_lag_hours=resolved_settings.sec_reporting_lag_hours)
+    app.extensions["fundamental_analysis"] = fundamental_analysis or FundamentalAnalysisService(app.extensions["sec_edgar"], app.extensions["market_data"])
     app.register_blueprint(system_blueprint, url_prefix="/api")
     app.register_blueprint(market_blueprint, url_prefix="/api")
     app.register_blueprint(news_blueprint, url_prefix="/api")
