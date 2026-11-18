@@ -36,4 +36,5 @@ __pycache__/
 /data/fred_cache/
 /data/regimes/
 /data/score_history.db*
+/data/news_intelligence.db*
 /artifacts/cross_sectional/*/walk_forward_scores.csv

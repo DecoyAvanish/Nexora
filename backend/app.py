@@ -17,6 +17,7 @@ from .routes.paper_trading import paper_blueprint
 from .routes.risk import risk_blueprint
 from .routes.regime import regime_blueprint
 from .routes.events import events_blueprint
+from .routes.news_intelligence import news_intelligence_blueprint
 from .routes.system import system_blueprint
 from .services.market_data import MarketDataService
 from .services.news import NewsService
@@ -33,6 +34,7 @@ from .services.fred import FredService
 from .services.market_regime import MarketRegimeService
 from .services.score_history import ScoreHistoryService
 from .services.event_intelligence import EventIntelligenceService
+from .services.news_intelligence import NewsIntelligenceService
 from .services.prediction import PredictionService
 
 
@@ -57,6 +59,7 @@ def create_app(settings: Settings | None = None, *, market_data=None, prediction
     app.extensions["market_regime"] = market_regime or MarketRegimeService(app.extensions["fred"], app.extensions["market_data"], resolved_settings.regime_snapshot_root)
     app.extensions["score_history"] = ScoreHistoryService(resolved_settings.score_history_db_path)
     app.extensions["event_intelligence"] = EventIntelligenceService(app.extensions["news"],app.extensions["sentiment"],app.extensions["sec_edgar"],app.extensions["market_data"],app.extensions["score_history"],app.extensions["paper_execution"])
+    app.extensions["news_intelligence"] = NewsIntelligenceService(app.extensions["news"],app.extensions["sentiment"],resolved_settings.news_intelligence_db_path)
     app.register_blueprint(system_blueprint, url_prefix="/api")
     app.register_blueprint(market_blueprint, url_prefix="/api")
     app.register_blueprint(news_blueprint, url_prefix="/api")
@@ -68,6 +71,7 @@ def create_app(settings: Settings | None = None, *, market_data=None, prediction
     app.register_blueprint(risk_blueprint, url_prefix="/api")
     app.register_blueprint(regime_blueprint, url_prefix="/api")
     app.register_blueprint(events_blueprint, url_prefix="/api")
+    app.register_blueprint(news_intelligence_blueprint, url_prefix="/api")
 
     @app.get("/")
     def index():
