@@ -40,6 +40,16 @@ ChartJS.register(
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001/api';
 
+const formatOrdinal = (value) => {
+  if (value == null) return 'N/A';
+  const rounded = Math.round(value);
+  const mod100 = rounded % 100;
+  const suffix = mod100 >= 11 && mod100 <= 13
+    ? 'th'
+    : ({ 1: 'st', 2: 'nd', 3: 'rd' }[rounded % 10] || 'th');
+  return `${rounded}${suffix}`;
+};
+
 function Stocks() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -593,18 +603,35 @@ function Stocks() {
               </span>
             </div>
             <div className="prediction-card highlight">
-              <span className="prediction-label">Technical</span>
-              <span className="prediction-value predicted">{stockData.components?.technical?.toFixed(0) || 'N/A'}</span>
+              <span className="prediction-label">
+                {stockData.outperformance_probability != null ? 'Outperform Probability' : 'Technical'}
+              </span>
+              <span className="prediction-value predicted">
+                {stockData.outperformance_probability != null
+                  ? `${(stockData.outperformance_probability * 100).toFixed(0)}%`
+                  : stockData.components?.technical?.toFixed(0) || 'N/A'}
+              </span>
             </div>
             <div className="prediction-card">
-              <span className="prediction-label">News Sentiment</span>
-              <span className={`prediction-value ${stockData.sentiment?.sentiment_score >= 0 ? 'positive' : 'negative'}`}>
-                {stockData.sentiment ? `${stockData.sentiment.label.toUpperCase()} (${stockData.sentiment.article_count})` : 'N/A'}
+              <span className="prediction-label">
+                {stockData.universe_percentile != null ? 'Universe / Sector' : 'News Sentiment'}
               </span>
+              {stockData.universe_percentile != null ? (
+                <span className="prediction-value positive">
+                  {formatOrdinal(stockData.universe_percentile)} / {formatOrdinal(stockData.sector_percentile)}
+                </span>
+              ) : (
+                <span className={`prediction-value ${stockData.sentiment?.sentiment_score >= 0 ? 'positive' : 'negative'}`}>
+                  {stockData.sentiment ? `${stockData.sentiment.label.toUpperCase()} (${stockData.sentiment.article_count})` : 'N/A'}
+                </span>
+              )}
             </div>
           </div>
           <div className="prediction-note">
-            FinBERT news sentiment • Multi-window technical factors • Not financial advice
+            {stockData.model_version
+              ? `Calibrated cross-sectional LightGBM • Model ${stockData.model_version} • Data through ${stockData.data_through}`
+              : 'FinBERT news sentiment • Multi-window technical factors • Fallback model'}
+            {' • Not financial advice'}
           </div>
           {stockData.top_drivers?.length > 0 && (
             <div className="prediction-note">
