@@ -29,6 +29,15 @@ class EventIntelligenceService:
         for article in analyzed:
             text=article["title"].lower(); matches=[kind for kind,terms in NEWS_RULES.items() if any(term in text for term in terms)]
             for kind in matches or ["company_news"]: events.append(self._event(kind,article.get("published_at"),article["title"],"news",article.get("url"),article.get("sentiment","neutral"),article.get("sentiment_confidence",0.5),{"publisher":article.get("domain")}))
+        daily_sentiment={}
+        polarity={"negative":-1,"neutral":0,"positive":1}
+        for article in analyzed:
+            day=(article.get("published_at") or datetime.now(timezone.utc).isoformat())[:10]
+            daily_sentiment.setdefault(day,[]).append(polarity.get(article.get("sentiment"),0)*float(article.get("sentiment_confidence",0)))
+        sentiment_points=[(day,sum(values)/len(values)) for day,values in sorted(daily_sentiment.items())]
+        for previous,current in zip(sentiment_points,sentiment_points[1:]):
+            delta=current[1]-previous[1]
+            if abs(delta)>=.25: events.append(self._event("sentiment_change",f"{current[0]}T23:59:00+00:00",f"News sentiment shifted {delta:+.2f}","finbert",None,"positive" if delta>0 else "negative",min(1,abs(delta)),{"from":previous[1],"to":current[1],"delta":delta}))
         try:
             for filing in self.sec.recent_filings(symbol,100)["filings"]:
                 timestamp=filing["accepted_at"]
