@@ -1,0 +1,77 @@
+name: Retrain cross-sectional model
+
+on:
+  workflow_dispatch:
+    inputs:
+      start_date:
+        description: Earliest feature date
+        required: false
+        default: "2018-01-01"
+  schedule:
+    # 02:15 UTC Tuesday-Saturday, after the preceding US market session.
+    - cron: "15 2 * * 2-6"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cross-sectional-model-retraining
+  cancel-in-progress: false
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      DATASET_PATH: data/features/cross_sectional.parquet
+      ARTIFACT_ROOT: artifacts/cross_sectional
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install model dependencies
+        run: pip install -r requirements.txt
+
+      - name: Verify training modules
+        run: python -m pytest backend/tests/test_dataset.py backend/tests/test_training.py backend/tests/test_cross_sectional_service.py -q
+
+      - name: Build daily S&P 500 snapshots
+        run: |
+          python -m backend.training.dataset \
+            --start "${{ inputs.start_date || '2018-01-01' }}" \
+            --refresh-universe \
+            --output "$DATASET_PATH"
+
+      - name: Train calibrated walk-forward model
+        run: |
+          python -m backend.training.cross_sectional \
+            "$DATASET_PATH" \
+            --artifacts "$ARTIFACT_ROOT" \
+            --train-days 756 \
+            --test-days 63 \
+            --embargo-days 63 \
+            --calibration-days 63
+
+      - name: Verify published artifact
+        run: |
+          test -s "$ARTIFACT_ROOT/latest.json"
+          find "$ARTIFACT_ROOT" -name model.joblib -size +0 -print -quit | grep .
+          find "$ARTIFACT_ROOT" -name daily_scores.csv -size +0 -print -quit | grep .
+
+      - name: Upload versioned production model
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexora-cross-sectional-model-${{ github.run_number }}
+          path: |
+            artifacts/cross_sectional/
+            data/sp500_universe.csv
+          if-no-files-found: error
+          retention-days: 90

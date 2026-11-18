@@ -100,6 +100,14 @@ Train and publish a versioned model:
   --artifacts artifacts/cross_sectional
 ```
 
+The `Retrain cross-sectional model` GitHub Actions workflow runs after each US market session from Tuesday through Saturday. It refreshes the universe, rebuilds daily snapshots, executes the leakage-safe tests, retrains and calibrates the model, verifies the artifact, and uploads a versioned production bundle with 90-day retention. It can also be started manually with a custom history start date.
+
+Inspect a downloaded artifact before deployment:
+
+```bash
+.venv/bin/python -m backend.training.report --artifacts artifacts/cross_sectional
+```
+
 ## Security notes
 
 - Keep `.env` and Firebase service credentials out of Git.
