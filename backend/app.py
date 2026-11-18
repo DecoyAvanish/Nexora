@@ -23,6 +23,8 @@ from .routes.research import research_blueprint
 from .routes.journal import journal_blueprint
 from .routes.assistant import assistant_blueprint
 from .routes.pipeline import pipeline_blueprint
+from .routes.observability import observability_blueprint
+from .routes.public import public_blueprint
 from .routes.system import system_blueprint
 from .services.market_data import MarketDataService
 from .services.news import NewsService
@@ -49,6 +51,8 @@ from .services.research_assistant import ResearchAssistantService
 from .services.production_controls import ProductionControls
 from .services.pipeline import PipelineOrchestrator
 from .services.resilience import ResilienceManager, ResilientNewsService
+from .services.observability import ObservabilityService
+from .services.public_content import PublicContentService
 from .services.prediction import PredictionService
 
 
@@ -60,7 +64,8 @@ def create_app(settings: Settings | None = None, *, market_data=None, prediction
     app.extensions["market_data"] = market_data or MarketDataService(resolved_settings.request_timeout_seconds)
     app.extensions["prediction"] = prediction or PredictionService()
     base_news = news or NewsService(resolved_settings.request_timeout_seconds)
-    app.extensions["resilience"] = ResilienceManager(resolved_settings.redis_url)
+    app.extensions["observability"] = ObservabilityService(resolved_settings.observability_db_path)
+    app.extensions["resilience"] = ResilienceManager(resolved_settings.redis_url,observability=app.extensions["observability"])
     app.extensions["news"] = base_news if news else ResilientNewsService(base_news, app.extensions["resilience"])
     app.extensions["sentiment"] = sentiment or SentimentService()
     app.extensions["scoring"] = scoring or StockScoringService()
@@ -83,11 +88,12 @@ def create_app(settings: Settings | None = None, *, market_data=None, prediction
     app.extensions["research_journal"] = ResearchJournalService(resolved_settings.research_journal_db_path,app.extensions["cross_sectional"])
     app.extensions["research_assistant"] = ResearchAssistantService(app.extensions["cross_sectional"],app.extensions["explainability"],app.extensions["event_intelligence"],app.extensions["fundamental_analysis"],app.extensions["sec_edgar"],app.extensions["historical_research"],app.extensions["paper_execution"])
     app.extensions["pipeline"] = PipelineOrchestrator(resolved_settings.pipeline_db_path)
+    app.extensions["public_content"] = PublicContentService(app.extensions["cross_sectional"],app.extensions["model_lab"],app.extensions["historical_research"],resolved_settings.model_artifact_root)
     app.extensions["pipeline"].register("daily_price_ingestion",lambda payload:{"rows_processed":len(app.extensions["market_data"].history(payload.get("symbol","SPY"),"1y").dates)})
     app.extensions["pipeline"].register("news_collection",lambda payload:{"rows_processed":len(app.extensions["news"].company_news(payload.get("symbol","AAPL"),days=2,limit=75))})
     app.extensions["pipeline"].register("sec_filing_ingestion",lambda payload:{"rows_processed":len(app.extensions["sec_edgar"].recent_filings(payload.get("symbol","AAPL"),100)["filings"])})
     for job in ("intraday_quote_updates","feature_generation","score_calculation","model_monitoring","model_retraining","alert_generation"):app.extensions["pipeline"].register(job,lambda payload,job=job:{"rows_processed":0,"delegated":job})
-    ProductionControls(resolved_settings.audit_db_path).register(app)
+    ProductionControls(resolved_settings.audit_db_path,observability=app.extensions["observability"]).register(app)
     app.register_blueprint(system_blueprint, url_prefix="/api")
     app.register_blueprint(market_blueprint, url_prefix="/api")
     app.register_blueprint(news_blueprint, url_prefix="/api")
@@ -105,6 +111,8 @@ def create_app(settings: Settings | None = None, *, market_data=None, prediction
     app.register_blueprint(journal_blueprint, url_prefix="/api")
     app.register_blueprint(assistant_blueprint, url_prefix="/api")
     app.register_blueprint(pipeline_blueprint, url_prefix="/api")
+    app.register_blueprint(observability_blueprint, url_prefix="/api")
+    app.register_blueprint(public_blueprint, url_prefix="/api")
 
     @app.get("/")
     def index():
