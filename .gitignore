@@ -32,4 +32,5 @@ __pycache__/
 .pytest_cache/
 /data/features/
 /data/sec_cache/
+/data/paper_trading.db*
 /artifacts/cross_sectional/*/walk_forward_scores.csv

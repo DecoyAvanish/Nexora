@@ -13,6 +13,7 @@ from .routes.sentiment import sentiment_blueprint
 from .routes.scoring import scoring_blueprint
 from .routes.model_lab import model_lab_blueprint
 from .routes.fundamentals import fundamentals_blueprint
+from .routes.paper_trading import paper_blueprint
 from .routes.system import system_blueprint
 from .services.market_data import MarketDataService
 from .services.news import NewsService
@@ -22,10 +23,12 @@ from .services.cross_sectional import CrossSectionalScoreService
 from .services.model_lab import ModelLabService
 from .services.sec_edgar import SecEdgarService
 from .services.fundamental_analysis import FundamentalAnalysisService
+from .services.auth import IdentityService
+from .services.paper_execution import PaperExecutionService
 from .services.prediction import PredictionService
 
 
-def create_app(settings: Settings | None = None, *, market_data=None, prediction=None, news=None, sentiment=None, scoring=None, cross_sectional=None, model_lab=None, sec_edgar=None, fundamental_analysis=None) -> Flask:
+def create_app(settings: Settings | None = None, *, market_data=None, prediction=None, news=None, sentiment=None, scoring=None, cross_sectional=None, model_lab=None, sec_edgar=None, fundamental_analysis=None, identity=None, paper_execution=None) -> Flask:
     app = Flask(__name__)
     resolved_settings = settings or Settings.from_env()
     app.config["SETTINGS"] = resolved_settings
@@ -39,6 +42,8 @@ def create_app(settings: Settings | None = None, *, market_data=None, prediction
     app.extensions["model_lab"] = model_lab or ModelLabService(resolved_settings.model_artifact_root)
     app.extensions["sec_edgar"] = sec_edgar or SecEdgarService(resolved_settings.sec_user_agent, resolved_settings.request_timeout_seconds, reporting_lag_hours=resolved_settings.sec_reporting_lag_hours)
     app.extensions["fundamental_analysis"] = fundamental_analysis or FundamentalAnalysisService(app.extensions["sec_edgar"], app.extensions["market_data"])
+    app.extensions["identity"] = identity or IdentityService(resolved_settings.firebase_web_api_key, resolved_settings.environment, resolved_settings.request_timeout_seconds)
+    app.extensions["paper_execution"] = paper_execution or PaperExecutionService(resolved_settings.paper_db_path, app.extensions["market_data"], resolved_settings.paper_starting_cash, resolved_settings.paper_slippage_bps, resolved_settings.paper_commission)
     app.register_blueprint(system_blueprint, url_prefix="/api")
     app.register_blueprint(market_blueprint, url_prefix="/api")
     app.register_blueprint(news_blueprint, url_prefix="/api")
@@ -46,6 +51,7 @@ def create_app(settings: Settings | None = None, *, market_data=None, prediction
     app.register_blueprint(scoring_blueprint, url_prefix="/api")
     app.register_blueprint(model_lab_blueprint, url_prefix="/api")
     app.register_blueprint(fundamentals_blueprint, url_prefix="/api")
+    app.register_blueprint(paper_blueprint, url_prefix="/api")
 
     @app.get("/")
     def index():
