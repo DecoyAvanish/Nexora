@@ -1,0 +1,35 @@
+"""Flask application factory for the Nexora API."""
+
+from __future__ import annotations
+
+from flask import Flask, jsonify
+from flask_cors import CORS
+
+from .config import Settings
+from .errors import register_error_handlers
+from .routes.system import system_blueprint
+
+
+def create_app(settings: Settings | None = None) -> Flask:
+    app = Flask(__name__)
+    resolved_settings = settings or Settings.from_env()
+    app.config["SETTINGS"] = resolved_settings
+    CORS(app, resources={r"/api/*": {"origins": list(resolved_settings.allowed_origins)}})
+    app.register_blueprint(system_blueprint, url_prefix="/api")
+
+    @app.get("/")
+    def index():
+        return jsonify({"service": "nexora-api", "health": "/api/health"})
+
+    register_error_handlers(app)
+    return app
+
+
+def main() -> None:
+    settings = Settings.from_env()
+    app = create_app(settings)
+    app.run(host=settings.host, port=settings.port, debug=settings.environment == "development")
+
+
+if __name__ == "__main__":
+    main()

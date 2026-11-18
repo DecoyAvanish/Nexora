@@ -26,5 +26,7 @@ yarn-error.log*
 __pycache__/
 *.pyc
 .env
+!.env.example
 .DS_Store
 .ipynb_checkpoints/
+.pytest_cache/
