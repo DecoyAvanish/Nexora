@@ -11,6 +11,7 @@ import SignUp from './SignUp';
 import Account from './Account';
 import ModelLab from './ModelLab';
 import RiskLab from './RiskLab';
+import ResearchLab from './ResearchLab';
 import { auth, onAuthStateChanged } from './firebase';
 
 function App() {
@@ -139,6 +140,8 @@ function App() {
         return <Cash />;
       case 'risk':
         return <RiskLab />;
+      case 'research':
+        return <ResearchLab />;
       case 'account':
         return <Account user={user} onLogout={handleLogout} />;
       case 'portfolio':
@@ -164,7 +167,7 @@ function App() {
   }
 
   // Check if user is authenticated and on a page that should show the header
-  const showHeader = currentPage === 'modelLab' || (user && ['portfolio', 'stocks', 'cash', 'risk', 'account'].includes(currentPage));
+  const showHeader = currentPage === 'modelLab' || (user && ['portfolio', 'stocks', 'cash', 'risk', 'research', 'account'].includes(currentPage));
 
   return (
     <div className="App">
