@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import argparse
+from io import StringIO
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import requests
 
 SP500_URL = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
 BASE_FEATURES = [
@@ -30,7 +32,13 @@ def load_sp500_universe(cache_path: Path, refresh: bool = False) -> pd.DataFrame
     if cache_path.exists() and not refresh:
         universe = pd.read_csv(cache_path)
     else:
-        table = pd.read_html(SP500_URL, attrs={"id": "constituents"})[0]
+        response = requests.get(
+            SP500_URL,
+            headers={"User-Agent": "Nexora research pipeline (contact: nexora-local)"},
+            timeout=30,
+        )
+        response.raise_for_status()
+        table = pd.read_html(StringIO(response.text), attrs={"id": "constituents"})[0]
         universe = table.rename(columns={
             "Symbol": "ticker",
             "Security": "company",
