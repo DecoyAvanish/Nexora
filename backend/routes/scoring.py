@@ -19,8 +19,12 @@ def score_stock(symbol: str):
         sentiment = None
         score_source = "production_cross_sectional_model"
     else:
-        articles = current_app.extensions["news"].company_news(normalized, company_name, days=14, limit=50)
-        sentiment = current_app.extensions["sentiment"].analyze(articles)
+        partial=False;missing=[];partial_reason=None
+        try:
+            articles = current_app.extensions["news"].company_news(normalized, company_name, days=14, limit=50)
+            sentiment = current_app.extensions["sentiment"].analyze(articles)
+        except ApiError as error:
+            sentiment={"sentiment_score":0,"article_count":0,"label":"unavailable","confidence":0,"articles":[]};partial=True;missing=["sentiment"];partial_reason=error.code
         score = current_app.extensions["scoring"].score(history, sentiment)
         score.update({
             "outperformance_probability": None,
@@ -29,6 +33,9 @@ def score_stock(symbol: str):
             "model_version": None,
             "data_through": history.dates[-1],
             "model_type": "technical_sentiment_fallback",
+            "partial":partial,
+            "missing_components":missing,
+            "reason":partial_reason,
         })
         score_source = "fallback_composite"
     previous = history.closes[-2] if len(history.closes) > 1 else history.last_price

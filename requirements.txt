@@ -12,4 +12,5 @@ torch==2.8.0
 transformers==4.57.3
 yfinance==1.2.0
 websocket-client==1.8.0
+redis==5.2.1
 pytest==8.4.2
