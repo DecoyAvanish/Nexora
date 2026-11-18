@@ -1,0 +1,4 @@
+title = "Nexora secret scanning"
+[allowlist]
+description = "Firebase browser API identifiers are public project configuration, not server credentials."
+regexes = ['''AIzaSyAil3clxr5vGlTNpC7qux7s8kUEt2mC-Fk''']

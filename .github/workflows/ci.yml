@@ -1,0 +1,60 @@
+name: Quality gate
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11", cache: pip}
+      - run: pip install -r requirements-dev.txt
+      - run: ruff check backend
+      - run: pytest backend/tests
+      - run: pip-audit -r requirements.txt
+      - run: python -m backend.migrations
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 20, cache: npm}
+      - run: npm ci
+      - run: npx eslint src --ext .js
+      - run: CI=true npm test -- --watchAll=false
+      - run: npm run build
+      - run: npm audit --audit-level=high
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 20, cache: npm}
+      - run: npm ci
+      - run: npm install --no-save @playwright/test@1.49.1
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t nexora-api:${{ github.sha }} .
+  deploy-gate:
+    if: github.ref == 'refs/heads/main'
+    needs: [python, frontend, security, container, e2e]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - run: echo "All checks passed; production deployment is authorized."
