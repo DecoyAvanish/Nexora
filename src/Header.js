@@ -6,6 +6,7 @@ function Header({ onNavigate, currentPage, user, onLogout }) {
     { id: 'portfolio', label: 'Portfolio' },
     { id: 'stocks', label: 'Stocks' },
     { id: 'cash', label: 'Cash' },
+    { id: 'risk', label: 'Risk Lab' },
     { id: 'modelLab', label: 'Model Lab' },
   ];
 
