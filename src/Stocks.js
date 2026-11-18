@@ -66,6 +66,7 @@ function Stocks() {
   const [orderSuccess, setOrderSuccess] = useState(null);
   const [portfolioValue, setPortfolioValue] = useState(0);
   const [fundamentals, setFundamentals] = useState(null);
+  const [eventIntelligence, setEventIntelligence] = useState(null);
 
   const searchTimeout = useRef(null);
 
@@ -113,6 +114,7 @@ function Stocks() {
     setError(null);
     setOrderSuccess(null);
     setFundamentals(null);
+    setEventIntelligence(null);
     try {
       const response = await axios.get(`${API_BASE}/score/${encodeURIComponent(symbol)}`, {
         timeout: 60000
@@ -122,6 +124,10 @@ function Stocks() {
       axios.get(`${API_BASE}/fundamentals/${encodeURIComponent(symbol)}`, { timeout: 60000 })
         .then(({ data }) => setFundamentals(data))
         .catch(() => setFundamentals(null));
+      const eventHeaders = auth.currentUser ? await authHeaders() : {};
+      axios.get(`${API_BASE}/events/${encodeURIComponent(symbol)}/explain?days=45`, { headers:eventHeaders, timeout:60000 })
+        .then(({data}) => setEventIntelligence(data))
+        .catch(() => setEventIntelligence(null));
     } catch (err) {
       console.error('Error fetching stock data:', err);
       
@@ -552,6 +558,29 @@ function Stocks() {
             </div>
           )}
         </div>
+
+        {eventIntelligence && (
+          <section className="event-intelligence">
+            <div className="event-intelligence-header">
+              <div><span>EVENT INTELLIGENCE</span><h3>Why did the score move?</h3></div>
+              <b>{eventIntelligence.summary.event_count} signals · 45 days</b>
+            </div>
+            <div className="event-answer">{eventIntelligence.explanation}</div>
+            <div className="event-timeline">
+              {eventIntelligence.events.slice(0,12).map((event) => (
+                <article key={event.id} className={`timeline-event sentiment-${event.sentiment}`}>
+                  <i />
+                  <div className="timeline-time">{new Date(event.timestamp).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</div>
+                  <div className="timeline-copy">
+                    <span>{event.type.replaceAll('_',' ')}</span>
+                    {event.source_url ? <a href={event.source_url} target="_blank" rel="noreferrer">{event.title} ↗</a> : <strong>{event.title}</strong>}
+                    <small>{event.source} · {(event.confidence*100).toFixed(0)}% confidence</small>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
 
         <div className="trading-panel">
           <div className="order-toggle">
