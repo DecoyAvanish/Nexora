@@ -49,6 +49,7 @@ Open [http://localhost:3000](http://localhost:3000). The API listens on [http://
 | `GET` | `/api/predict/AAPL` | Historical series plus LSTM forecast |
 | `GET` | `/api/news/AAPL?company=Apple%20Inc` | Recent company news from GDELT |
 | `GET` | `/api/sentiment/AAPL?company=Apple%20Inc` | FinBERT sentiment for recent real headlines |
+| `GET` | `/api/score/AAPL?company=Apple%20Inc` | Explainable 1–10 score and green/red signal |
 
 Errors use a consistent shape:
 
