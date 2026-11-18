@@ -12,6 +12,10 @@ class FakeCrossSectional:
     available = False
 
 
+class FakeModelLab:
+    available = False
+
+
 @pytest.fixture()
 def settings():
     return Settings("test", "127.0.0.1", 5001, ("http://localhost:3000",), 1, "artifacts/test")
@@ -19,7 +23,7 @@ def settings():
 
 @pytest.fixture()
 def app(settings):
-    app = create_app(settings, prediction=FakePrediction(), cross_sectional=FakeCrossSectional())
+    app = create_app(settings, prediction=FakePrediction(), cross_sectional=FakeCrossSectional(), model_lab=FakeModelLab())
     app.config.update(TESTING=True)
     return app
 

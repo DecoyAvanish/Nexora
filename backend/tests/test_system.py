@@ -7,6 +7,7 @@ def test_health_endpoint(client):
         "environment": "test",
         "prediction_artifacts_available": True,
         "cross_sectional_model_available": False,
+        "model_lab_available": False,
     }
 
 

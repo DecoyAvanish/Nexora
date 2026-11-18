@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
@@ -80,7 +81,7 @@ def assign_deciles(probabilities: pd.Series) -> pd.Series:
 
 def _new_model():
     import lightgbm as lgb
-    return lgb.LGBMClassifier(objective="binary", n_estimators=500, learning_rate=0.02, num_leaves=31, subsample=0.8, subsample_freq=1, colsample_bytree=0.3, min_child_samples=250, reg_alpha=0.2, reg_lambda=0.5, random_state=42, n_jobs=-1, verbosity=-1)
+    return lgb.LGBMClassifier(objective="binary", n_estimators=500, learning_rate=0.02, num_leaves=31, subsample=0.8, subsample_freq=1, colsample_bytree=0.3, min_child_samples=250, reg_alpha=0.2, reg_lambda=0.5, random_state=42, n_jobs=-1, verbosity=-1, importance_type="gain")
 
 
 def fit_calibrated_model(train: pd.DataFrame, feature_columns: list[str], calibration_days: int = 63) -> CalibratedModel:
@@ -110,6 +111,7 @@ def train_walk_forward(data: pd.DataFrame, feature_columns: list[str], *, train_
     dates = np.array(sorted(labeled["date"].unique()))
     folds: list[FoldMetrics] = []
     scored_frames = []
+    importance_frames = []
     momentum_column = "return_126d_universe_rank"
     for test_start in range(train_days + embargo_days, len(dates), test_days):
         test_end = min(test_start + test_days, len(dates))
@@ -128,13 +130,20 @@ def train_walk_forward(data: pd.DataFrame, feature_columns: list[str], *, train_
             test["sector_percentile"] = test.groupby(["date", "sector"])["probability"].rank(pct=True) * 100
         excess_return = test["fwd_ret_63d"] - test["bench_ret_63d"]
         momentum = test[momentum_column] if momentum_column in test else test[feature_columns[0]]
+        technical_columns = [column for column in feature_columns if any(token in column for token in ("return_", "ma20_", "ma50_", "ma200_", "rsi_", "drawdown_", "volume_"))]
+        test["momentum_probability"] = momentum
+        test["technical_probability"] = test[technical_columns].mean(axis=1) if technical_columns else momentum
+        sentiment_column = next((column for column in feature_columns if "sentiment" in column and column.endswith("_universe_rank")), None)
+        test["sentiment_probability"] = test[sentiment_column] if sentiment_column else np.nan
+        test["random_probability"] = [int(hashlib.sha256(f"{date}|{ticker}".encode()).hexdigest()[:8], 16) / 0xFFFFFFFF for date, ticker in zip(test["date"], test["ticker"])]
         spread = test.loc[test["ai_score"] == 10, "fwd_ret_63d"].mean() - test.loc[test["ai_score"] == 1, "fwd_ret_63d"].mean()
         folds.append(FoldMetrics(str(train_dates[0]), str(train_dates[-1]), str(test_dates[0]), str(test_dates[-1]), len(test), _safe_auc(test["y"], test["probability"]), float(test["probability"].corr(excess_return, method="spearman")), float(spread), _safe_auc(test["y"], momentum), float(momentum.corr(excess_return, method="spearman"))))
-        columns = ["date", "ticker", "sector", "probability", "ai_score", "universe_percentile", "sector_percentile", "fwd_ret_63d", "bench_ret_63d"]
+        columns = ["date", "ticker", "sector", "probability", "momentum_probability", "technical_probability", "sentiment_probability", "random_probability", "ai_score", "universe_percentile", "sector_percentile", "fwd_ret_63d", "bench_ret_63d", "y"]
         scored_frames.append(test[[column for column in columns if column in test]])
+        importance_frames.append(pd.DataFrame({"fold": len(folds), "feature": feature_columns, "importance": bundle.model.feature_importances_}))
     if not folds:
         raise ValueError("Not enough observations for one calibrated purged walk-forward fold.")
-    return fit_calibrated_model(labeled, feature_columns, calibration_days), folds, pd.concat(scored_frames, ignore_index=True)
+    return fit_calibrated_model(labeled, feature_columns, calibration_days), folds, pd.concat(scored_frames, ignore_index=True), pd.concat(importance_frames, ignore_index=True)
 
 
 def score_latest_snapshot(bundle: CalibratedModel, data: pd.DataFrame) -> pd.DataFrame:
@@ -147,7 +156,7 @@ def score_latest_snapshot(bundle: CalibratedModel, data: pd.DataFrame) -> pd.Dat
     return latest
 
 
-def publish_artifact(bundle: CalibratedModel, folds: list[FoldMetrics], walk_forward_scores: pd.DataFrame, latest_scores: pd.DataFrame, artifact_root: Path) -> Path:
+def publish_artifact(bundle: CalibratedModel, folds: list[FoldMetrics], walk_forward_scores: pd.DataFrame, latest_scores: pd.DataFrame, feature_importance: pd.DataFrame, artifact_root: Path) -> Path:
     import joblib
 
     data_through = pd.Timestamp(latest_scores["date"].max()).date().isoformat()
@@ -157,12 +166,15 @@ def publish_artifact(bundle: CalibratedModel, folds: list[FoldMetrics], walk_for
     joblib.dump(bundle, version_directory / "model.joblib")
     walk_forward_scores.to_csv(version_directory / "walk_forward_scores.csv", index=False)
     latest_scores.to_csv(version_directory / "daily_scores.csv", index=False)
+    feature_importance.to_csv(version_directory / "feature_importance_by_fold.csv", index=False)
     metrics = [asdict(fold) for fold in folds]
     (version_directory / "metrics.json").write_text(json.dumps(metrics, indent=2))
     manifest = {"model_version": version, "data_through": data_through, "created_at": datetime.now(timezone.utc).isoformat(), "universe": "S&P 500", "horizon_trading_days": 63, "feature_count": len(bundle.feature_columns), "fold_count": len(folds), "artifact_directory": str(version_directory), "mean_model_auc": float(np.mean([fold.model_auc for fold in folds])), "mean_momentum_auc": float(np.mean([fold.momentum_auc for fold in folds])), "mean_information_coefficient": float(np.mean([fold.model_information_coefficient for fold in folds]))}
     (version_directory / "manifest.json").write_text(json.dumps(manifest, indent=2))
     artifact_root.mkdir(parents=True, exist_ok=True)
     (artifact_root / "latest.json").write_text(json.dumps(manifest, indent=2))
+    from backend.evaluation.model_lab import write_model_lab_report
+    write_model_lab_report(version_directory)
     return version_directory
 
 
@@ -177,8 +189,8 @@ def main() -> None:
     args = parser.parse_args()
     frame = pd.read_parquet(args.dataset) if args.dataset.suffix == ".parquet" else pd.read_csv(args.dataset)
     data, features = prepare_frame(frame)
-    bundle, folds, scores = train_walk_forward(data, features, train_days=args.train_days, test_days=args.test_days, embargo_days=args.embargo_days, calibration_days=args.calibration_days)
-    output = publish_artifact(bundle, folds, scores, score_latest_snapshot(bundle, data), args.artifacts)
+    bundle, folds, scores, importance = train_walk_forward(data, features, train_days=args.train_days, test_days=args.test_days, embargo_days=args.embargo_days, calibration_days=args.calibration_days)
+    output = publish_artifact(bundle, folds, scores, score_latest_snapshot(bundle, data), importance, args.artifacts)
     print(f"Published calibrated model to {output}")
 
 
