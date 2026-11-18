@@ -1,8 +1,9 @@
-import React,{useState} from 'react';import axios from 'axios';import './ResearchLab.css';
+import React,{useEffect,useState} from 'react';import axios from 'axios';import {auth,database,doc,getDoc} from './firebase';import './ResearchLab.css';
 const API=process.env.REACT_APP_API_BASE_URL||'http://localhost:5001/api';
 const pct=value=>value==null?'N/A':`${(value*100).toFixed(1)}%`;
 export default function ResearchLab(){
  const [tab,setTab]=useState('replay'),[error,setError]=useState(''),[loading,setLoading]=useState(false);const [symbol,setSymbol]=useState('AAPL'),[date,setDate]=useState('2025-06-30'),[replay,setReplay]=useState(null);const [backtest,setBacktest]=useState(null);const [condition,setCondition]=useState({field:'ai_score',operator:'>=',value:8});const [strategy,setStrategy]=useState({rebalance:'monthly',max_positions:20,weighting:'equal',sector_limit:.3,transaction_cost_bps:5,slippage_bps:5});const [symbols,setSymbols]=useState('AAPL,MSFT,NVDA,GOOGL,AMZN'),[mode,setMode]=useState('maximum_sharpe'),[optimization,setOptimization]=useState(null),[watch,setWatch]=useState(null);
+ useEffect(()=>{if(!auth.currentUser)return;getDoc(doc(database,'users',auth.currentUser.uid)).then(snapshot=>{const saved=snapshot.data()?.watchlist;if(saved?.length)setSymbols(saved.join(','));}).catch(()=>{});},[]);
  const run=async action=>{setLoading(true);setError('');try{await action()}catch(err){setError(err.response?.data?.error?.message||err.message)}finally{setLoading(false)}};
  const replayScore=()=>run(async()=>setReplay((await axios.get(`${API}/replay/${symbol}?date=${date}`)).data));
  const config={...strategy,conditions:[{...condition,value:Number(condition.value)}]};const runBacktest=()=>run(async()=>setBacktest((await axios.post(`${API}/strategy/backtest`,config)).data));
