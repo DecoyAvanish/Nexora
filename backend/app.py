@@ -14,6 +14,7 @@ from .routes.scoring import scoring_blueprint
 from .routes.model_lab import model_lab_blueprint
 from .routes.fundamentals import fundamentals_blueprint
 from .routes.paper_trading import paper_blueprint
+from .routes.risk import risk_blueprint
 from .routes.system import system_blueprint
 from .services.market_data import MarketDataService
 from .services.news import NewsService
@@ -25,6 +26,7 @@ from .services.sec_edgar import SecEdgarService
 from .services.fundamental_analysis import FundamentalAnalysisService
 from .services.auth import IdentityService
 from .services.paper_execution import PaperExecutionService
+from .services.portfolio_risk import PortfolioRiskService
 from .services.prediction import PredictionService
 
 
@@ -44,6 +46,7 @@ def create_app(settings: Settings | None = None, *, market_data=None, prediction
     app.extensions["fundamental_analysis"] = fundamental_analysis or FundamentalAnalysisService(app.extensions["sec_edgar"], app.extensions["market_data"])
     app.extensions["identity"] = identity or IdentityService(resolved_settings.firebase_web_api_key, resolved_settings.environment, resolved_settings.request_timeout_seconds)
     app.extensions["paper_execution"] = paper_execution or PaperExecutionService(resolved_settings.paper_db_path, app.extensions["market_data"], resolved_settings.paper_starting_cash, resolved_settings.paper_slippage_bps, resolved_settings.paper_commission)
+    app.extensions["portfolio_risk"] = PortfolioRiskService(app.extensions["paper_execution"], app.extensions["market_data"])
     app.register_blueprint(system_blueprint, url_prefix="/api")
     app.register_blueprint(market_blueprint, url_prefix="/api")
     app.register_blueprint(news_blueprint, url_prefix="/api")
@@ -52,6 +55,7 @@ def create_app(settings: Settings | None = None, *, market_data=None, prediction
     app.register_blueprint(model_lab_blueprint, url_prefix="/api")
     app.register_blueprint(fundamentals_blueprint, url_prefix="/api")
     app.register_blueprint(paper_blueprint, url_prefix="/api")
+    app.register_blueprint(risk_blueprint, url_prefix="/api")
 
     @app.get("/")
     def index():
