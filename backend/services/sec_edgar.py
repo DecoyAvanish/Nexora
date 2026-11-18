@@ -17,6 +17,7 @@ from backend.services.market_data import normalize_symbol
 SEC_DATA_ROOT = "https://data.sec.gov"
 SEC_ARCHIVES_ROOT = "https://www.sec.gov/Archives/edgar/data"
 ALLOWED_FORMS = {"10-K", "10-K/A", "10-Q", "10-Q/A", "8-K", "8-K/A"}
+EVENT_FORMS = ALLOWED_FORMS | {"4", "4/A"}
 
 
 @dataclass(frozen=True)
@@ -28,6 +29,7 @@ class FilingReference:
     available_at: str
     primary_document: str
     document_url: str
+    items: str = ""
 
 
 @dataclass(frozen=True)
@@ -128,7 +130,7 @@ class SecEdgarService:
         cik_number = str(int(cik))
         for index, accession in enumerate(accessions):
             form = self._item(recent, "form", index)
-            if form not in ALLOWED_FORMS:
+            if form not in EVENT_FORMS:
                 continue
             accepted = self._item(recent, "acceptanceDateTime", index) or f"{self._item(recent, 'filingDate', index)}T23:59:59Z"
             accepted_at = self._parse_datetime(accepted)
@@ -143,6 +145,7 @@ class SecEdgarService:
                 available_at=available_at.isoformat(),
                 primary_document=document,
                 document_url=f"{SEC_ARCHIVES_ROOT}/{cik_number}/{accession_path}/{document}",
+                items=self._item(recent, "items", index) or "",
             )
         return result
 
