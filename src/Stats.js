@@ -4,7 +4,7 @@ import axios from 'axios';
 import StatsRow from './StatsRow';
 import { database, auth, doc, onSnapshot } from './firebase';
 
-const FINNHUB_TOKEN = "d9tj431r01qujo6kusr0d9tj431r01qujo6kusrg";
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001/api';
 
 function Stats() {
   const [stockData, setStockData] = useState([]);
@@ -15,10 +15,16 @@ function Stats() {
 
   const getStockData = async (stock) => {
     try {
-      const response = await axios.get(
-        `https://finnhub.io/api/v1/quote?symbol=${stock}&token=${FINNHUB_TOKEN}`
-      );
-      return response.data;
+      const { data } = await axios.get(`${API_BASE}/quote/${encodeURIComponent(stock)}`);
+      return {
+        c: data.price,
+        pc: data.previous_close,
+        o: data.open,
+        h: data.high,
+        l: data.low,
+        d: data.change,
+        dp: data.change_percent
+      };
     } catch (error) {
       console.error(`Error fetching ${stock}:`, error.message);
       return null;

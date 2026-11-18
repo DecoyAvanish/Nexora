@@ -38,8 +38,7 @@ ChartJS.register(
   Filler
 );
 
-const FINNHUB_TOKEN = "d9tj431r01qujo6kusr0d9tj431r01qujo6kusrg";
-const API_BASE = 'http://localhost:5001/api';
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001/api';
 
 function Stocks() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -116,29 +115,23 @@ function Stocks() {
       console.error('Error fetching stock data:', err);
       
       try {
-        const quoteResponse = await axios.get(
-          `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${FINNHUB_TOKEN}`
-        );
-        const profileResponse = await axios.get(
-          `https://finnhub.io/api/v1/stock/profile2?symbol=${symbol}&token=${FINNHUB_TOKEN}`
-        );
+        const quoteResponse = await axios.get(`${API_BASE}/quote/${encodeURIComponent(symbol)}`);
         
-        if (quoteResponse.data && quoteResponse.data.c) {
+        if (quoteResponse.data && quoteResponse.data.price) {
           const quote = quoteResponse.data;
-          const profile = profileResponse.data || {};
           
           setStockData({
             symbol: symbol,
-            name: profile.name || symbol,
-            last_price: quote.c,
-            last_return: (quote.c - quote.pc) / quote.pc,
+            name: symbol,
+            last_price: quote.price,
+            last_return: quote.previous_close ? (quote.price - quote.previous_close) / quote.previous_close : 0,
             predicted_return: 0,
-            predicted_price: quote.c,
+            predicted_price: quote.price,
             confidence: 0.5,
             chart_data: {
               dates: [new Date().toISOString().split('T')[0]],
-              prices: [quote.c],
-              volume: [0]
+              prices: [quote.price],
+              volume: [quote.volume || 0]
             }
           });
           setSelectedStock({ symbol });
