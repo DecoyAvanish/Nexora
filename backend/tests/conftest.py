@@ -18,7 +18,7 @@ class FakeModelLab:
 
 @pytest.fixture()
 def settings():
-    return Settings("test", "127.0.0.1", 5001, ("http://localhost:3000",), 1, "artifacts/test")
+    return Settings("test", "127.0.0.1", 5001, ("http://localhost:3000",), 1, "artifacts/test", "Nexora tests test@example.com", 24)
 
 
 @pytest.fixture()

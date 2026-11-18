@@ -18,6 +18,8 @@ class Settings:
     allowed_origins: tuple[str, ...]
     request_timeout_seconds: float
     model_artifact_root: str
+    sec_user_agent: str
+    sec_reporting_lag_hours: int
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -28,4 +30,6 @@ class Settings:
             allowed_origins=_csv(os.getenv("NEXORA_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")),
             request_timeout_seconds=float(os.getenv("NEXORA_REQUEST_TIMEOUT", "10")),
             model_artifact_root=os.getenv("NEXORA_MODEL_ARTIFACT_ROOT", "artifacts/cross_sectional"),
+            sec_user_agent=os.getenv("SEC_USER_AGENT", "Nexora research avanishpakalapati@gmail.com"),
+            sec_reporting_lag_hours=int(os.getenv("SEC_REPORTING_LAG_HOURS", "24")),
         )
