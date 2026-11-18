@@ -1,3 +1,4 @@
+// App.js (updated)
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import Header from './Header';
@@ -8,12 +9,15 @@ import Cash from './Cash';
 import Login from './Login';
 import SignUp from './SignUp';
 import Account from './Account';
+import ModelLab from './ModelLab';
 import { auth, onAuthStateChanged } from './firebase';
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState('portfolio');
+  const [currentPage, setCurrentPage] = useState(
+    window.location.hash === '#model-lab' ? 'modelLab' : 'portfolio'
+  );
   const [showAuth, setShowAuth] = useState('login');
 
   const orbs = Array.from({ length: 4 }, (_, i) => {
@@ -45,6 +49,20 @@ function App() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash === '#model-lab') setCurrentPage('modelLab');
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  const handleNavigate = (page) => {
+    setCurrentPage(page);
+    if (page === 'modelLab') window.location.hash = 'model-lab';
+    else if (window.location.hash === '#model-lab') window.history.replaceState(null, '', window.location.pathname);
+  };
+
   const handleLogin = () => {
     setUser(auth.currentUser);
   };
@@ -65,9 +83,7 @@ function App() {
   const renderSpaceBackground = () => (
     <div className="bg-space">
       <div className="bg-stars"></div>
-      
       <div className="bg-grid-overlay"></div>
-      
       {orbs.map((orb) => (
         <div 
           key={orb.id}
@@ -81,7 +97,6 @@ function App() {
           }}
         />
       ))}
-      
       {particles.map((particle) => (
         <div 
           key={particle.id}
@@ -98,6 +113,7 @@ function App() {
   );
 
   const renderContent = () => {
+    if (currentPage === 'modelLab') return <ModelLab />;
     if (!user) {
       if (showAuth === 'signup') {
         return (
@@ -144,18 +160,23 @@ function App() {
     );
   }
 
+  // Check if user is authenticated and on a page that should show the header
+  const showHeader = currentPage === 'modelLab' || (user && ['portfolio', 'stocks', 'cash', 'account'].includes(currentPage));
+
   return (
     <div className="App">
       {user && currentPage === 'portfolio' && renderSpaceBackground()}
 
-      <div className="header">
-        <Header 
-          onNavigate={setCurrentPage} 
-          currentPage={currentPage}
-          user={user}
-          onLogout={handleLogout}
-        />
-      </div>
+      {showHeader && (
+        <div className="header">
+          <Header
+            onNavigate={handleNavigate}
+            currentPage={currentPage}
+            user={user}
+            onLogout={handleLogout}
+          />
+        </div>
+      )}
       {renderContent()}
     </div>
   );

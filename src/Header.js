@@ -6,6 +6,7 @@ function Header({ onNavigate, currentPage, user, onLogout }) {
     { id: 'portfolio', label: 'Portfolio' },
     { id: 'stocks', label: 'Stocks' },
     { id: 'cash', label: 'Cash' },
+    { id: 'modelLab', label: 'Model Lab' },
   ];
 
   const handleNavClick = (e, id) => {
