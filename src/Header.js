@@ -10,6 +10,9 @@ function Header({ onNavigate, currentPage, user, onLogout }) {
     { id: 'research', label: 'Research' },
     { id: 'decisions', label: 'Decision Lab' },
     { id: 'modelLab', label: 'Model Lab' },
+    { id: 'modelCard', label: 'Model Card' },
+    { id: 'architecture', label: 'Architecture' },
+    { id: 'demo', label: 'Demo' },
   ];
 
   const handleNavClick = (e, id) => {

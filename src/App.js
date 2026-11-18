@@ -13,14 +13,14 @@ import ModelLab from './ModelLab';
 import RiskLab from './RiskLab';
 import ResearchLab from './ResearchLab';
 import DecisionLab from './DecisionLab';
+import PublicShowcase from './PublicShowcase';
 import { auth, onAuthStateChanged } from './firebase';
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(
-    window.location.hash === '#model-lab' ? 'modelLab' : 'portfolio'
-  );
+  const publicHashes = {'#model-lab':'modelLab','#model-card':'modelCard','#architecture':'architecture','#status':'status','#demo':'demo'};
+  const [currentPage, setCurrentPage] = useState(publicHashes[window.location.hash] || 'portfolio');
   const [showAuth, setShowAuth] = useState('login');
 
   const orbs = Array.from({ length: 4 }, (_, i) => {
@@ -53,17 +53,16 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const handleHashChange = () => {
-      if (window.location.hash === '#model-lab') setCurrentPage('modelLab');
-    };
+    const handleHashChange = () => setCurrentPage(publicHashes[window.location.hash] || 'portfolio');
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   const handleNavigate = (page) => {
     setCurrentPage(page);
-    if (page === 'modelLab') window.location.hash = 'model-lab';
-    else if (window.location.hash === '#model-lab') window.history.replaceState(null, '', window.location.pathname);
+    const hashes={modelLab:'model-lab',modelCard:'model-card',architecture:'architecture',status:'status',demo:'demo'};
+    if (hashes[page]) window.location.hash = hashes[page];
+    else if (window.location.hash) window.history.replaceState(null, '', window.location.pathname);
   };
 
   const handleLogin = () => {
@@ -117,6 +116,7 @@ function App() {
 
   const renderContent = () => {
     if (currentPage === 'modelLab') return <ModelLab />;
+    if (['modelCard','architecture','status','demo'].includes(currentPage)) return <PublicShowcase page={currentPage} onNavigate={handleNavigate} />;
     if (!user) {
       if (showAuth === 'signup') {
         return (
@@ -170,7 +170,7 @@ function App() {
   }
 
   // Check if user is authenticated and on a page that should show the header
-  const showHeader = currentPage === 'modelLab' || (user && ['portfolio', 'stocks', 'cash', 'risk', 'research', 'decisions', 'account'].includes(currentPage));
+  const showHeader = ['modelLab','modelCard','architecture','status','demo'].includes(currentPage) || (user && ['portfolio', 'stocks', 'cash', 'risk', 'research', 'decisions', 'account'].includes(currentPage));
 
   return (
     <div className="App">
