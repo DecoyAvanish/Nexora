@@ -12,9 +12,9 @@ def test_features_are_ranked_cross_sectionally():
         "bench_ret_63d": [0.05] * 3,
     })
     prepared, features = prepare_frame(frame)
-    assert features == ["momentum"]
-    assert prepared.loc[prepared.ticker == "A", "momentum"].iloc[0] == 1.0
-    assert prepared["y"].tolist() == [1, 0, 1]
+    assert features == ["momentum_universe_rank"]
+    assert prepared.loc[prepared.ticker == "A", "momentum_universe_rank"].iloc[0] == 1.0
+    assert prepared["y"].tolist() == [1.0, 0.0, 1.0]
 
 
 def test_probability_rank_becomes_one_to_ten_score():

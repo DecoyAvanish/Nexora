@@ -77,7 +77,7 @@ The live score works immediately from technical factors and real FinBERT news se
 .venv/bin/python -m backend.training.cross_sectional data/features.parquet
 ```
 
-The trainer ranks every feature cross-sectionally by date, applies a 63-trading-day embargo, runs walk-forward LightGBM folds, and exports the model, out-of-sample scores, AUC, information coefficient, and top-versus-bottom-decile return spread. Do not train it on restated or survivorship-biased data.
+The trainer applies a 63-trading-day embargo, reserves the latest 63 training dates for Platt probability calibration, runs walk-forward LightGBM folds, and compares the model with momentum and neutral baselines. It publishes a dated artifact directory containing the calibrated model, manifest, daily decile scores, out-of-sample scores, AUC, information coefficient, and top-versus-bottom-decile return spread.
 
 Build the daily S&P 500 feature and label dataset first:
 
@@ -89,6 +89,14 @@ Build the daily S&P 500 feature and label dataset first:
 ```
 
 This stores 5/21/63/126/252-day returns, volatility, trend, RSI, drawdown, and volume factors; forward 63-trading-day stock and SPY returns; and both universe-relative and sector-relative percentile ranks for each date.
+
+Train and publish a versioned model:
+
+```bash
+.venv/bin/python -m backend.training.cross_sectional \
+  data/features/cross_sectional.parquet \
+  --artifacts artifacts/cross_sectional
+```
 
 ## Security notes
 
