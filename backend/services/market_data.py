@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Any
 
 import requests
@@ -103,6 +103,20 @@ class MarketDataService:
             closes=[float(value) for value in frame["Close"].tolist()],
             volumes=[int(value) for value in frame["Volume"].tolist()],
         )
+
+    def history_until(self, raw_symbol: str, as_of: date | datetime | str, lookback_days: int = 400) -> MarketHistory:
+        """Return a historical window ending at `as_of`, preventing future-price leakage."""
+        symbol = normalize_symbol(raw_symbol)
+        end_date = date.fromisoformat(str(as_of)[:10])
+        try:
+            import yfinance as yf
+            frame = yf.download(symbol, start=(end_date-timedelta(days=lookback_days)).isoformat(), end=(end_date+timedelta(days=1)).isoformat(), auto_adjust=False, progress=False)
+        except Exception as error:
+            raise ApiError("Historical market data is temporarily unavailable.",503,"market_data_unavailable") from error
+        if frame is None or frame.empty: raise ApiError(f"No market data was found for {symbol} through {end_date}.",404,"symbol_not_found")
+        if getattr(frame.columns,"nlevels",1)>1: frame.columns=frame.columns.get_level_values(0)
+        frame=frame.dropna(subset=["Open","High","Low","Close","Volume"])
+        return MarketHistory(symbol,[index.strftime("%Y-%m-%d") for index in frame.index],[float(v) for v in frame["Open"]],[float(v) for v in frame["High"]],[float(v) for v in frame["Low"]],[float(v) for v in frame["Close"]],[int(v) for v in frame["Volume"]])
 
     @staticmethod
     def quote_payload(history: MarketHistory) -> dict[str, Any]:

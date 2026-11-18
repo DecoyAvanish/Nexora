@@ -19,7 +19,7 @@ class MarketRegimeService:
 
     def classify(self, as_of=None, persist=True):
         vintage=(as_of or datetime.now(timezone.utc)).date().isoformat() if not isinstance(as_of,str) else as_of[:10]
-        market=self._market_features(); macro={}; sources=[]; unavailable=[]
+        market=self._market_features(vintage); macro={}; sources=[]; unavailable=[]
         for name,series in SERIES.items():
             try:
                 observations=self.fred.observations(series,vintage)
@@ -42,8 +42,12 @@ class MarketRegimeService:
         explanation=f"Score {'increased' if adjustment>0 else 'reduced'} from {original:.1f} to {adjusted:.1f} because the current regime is {regime['label'].lower()} and this stock has a {beta:.2f} beta."
         return {"original_score":original,"adjusted_score":round(adjusted,2),"adjustment":round(adjustment,2),"beta_vs_spy":round(beta,3),"explanation":explanation,"regime":regime,"display_score":rounded}
 
-    def _market_features(self):
-        spy=self.market_data.history("SPY","1y"); rsp=self.market_data.history("RSP","1y")
+    def _market_features(self, as_of):
+        today=datetime.now(timezone.utc).date().isoformat()
+        if as_of < today and hasattr(self.market_data,"history_until"):
+            spy=self.market_data.history_until("SPY",as_of); rsp=self.market_data.history_until("RSP",as_of)
+        else:
+            spy=self.market_data.history("SPY","1y"); rsp=self.market_data.history("RSP","1y")
         closes=np.asarray(spy.closes); rsp_closes=np.asarray(rsp.closes); n=min(len(closes),len(rsp_closes))
         return {"spy_trend":round(float(closes[-1]/closes[-min(200,len(closes)):].mean()-1),4),"spy_return_63d":round(float(closes[-1]/closes[-64]-1),4),"realized_volatility":round(float(np.std(np.diff(closes[-22:])/closes[-22:-1])*np.sqrt(252)),4),"market_breadth":round(float((rsp_closes[-1]/rsp_closes[-64]-1)-(closes[-1]/closes[-64]-1)),4)}
     @staticmethod

@@ -14,10 +14,14 @@ class Fred:
 
 
 class Market:
+    historical_cutoff=None
     def history(self,symbol,period):
         values=np.linspace(120,90,260) if symbol=="SPY" else np.linspace(120,85,260)
         dates=np.arange("2026-01-01","2027-01-01",dtype="datetime64[D]")[:260].astype(str).tolist()
         data=values.tolist(); return MarketHistory(symbol,dates,data,data,data,data,[1000]*260)
+    def history_until(self,symbol,as_of,lookback_days=400):
+        self.historical_cutoff=as_of
+        return self.history(symbol,"historical")
 
 
 def test_regime_classifies_risk_off_and_preserves_vintage(tmp_path):
@@ -34,3 +38,8 @@ def test_high_beta_stock_receives_larger_risk_off_penalty(tmp_path):
     result=service.adjust_score({"ai_score":8},stock,{"state":"high_volatility_risk_off","label":"High Volatility Risk Off"})
     assert result["adjusted_score"]<result["original_score"]
     assert "Score reduced" in result["explanation"]
+
+
+def test_historical_regime_slices_market_inputs_at_same_date(tmp_path):
+    market=Market(); MarketRegimeService(Fred(),market,tmp_path).classify(datetime(2020,6,15,tzinfo=timezone.utc))
+    assert market.historical_cutoff=="2020-06-15"
