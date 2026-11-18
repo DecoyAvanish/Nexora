@@ -16,11 +16,12 @@ import DecisionLab from './DecisionLab';
 import PublicShowcase from './PublicShowcase';
 import { auth, onAuthStateChanged } from './firebase';
 
+const PUBLIC_HASHES = {'#model-lab':'modelLab','#model-card':'modelCard','#architecture':'architecture','#status':'status','#demo':'demo'};
+
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const publicHashes = {'#model-lab':'modelLab','#model-card':'modelCard','#architecture':'architecture','#status':'status','#demo':'demo'};
-  const [currentPage, setCurrentPage] = useState(publicHashes[window.location.hash] || 'portfolio');
+  const [currentPage, setCurrentPage] = useState(PUBLIC_HASHES[window.location.hash] || 'portfolio');
   const [showAuth, setShowAuth] = useState('login');
 
   const orbs = Array.from({ length: 4 }, (_, i) => {
@@ -53,7 +54,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const handleHashChange = () => setCurrentPage(publicHashes[window.location.hash] || 'portfolio');
+    const handleHashChange = () => setCurrentPage(PUBLIC_HASHES[window.location.hash] || 'portfolio');
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
