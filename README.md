@@ -47,6 +47,7 @@ Open [http://localhost:3000](http://localhost:3000). The API listens on [http://
 | `GET` | `/api/quote/AAPL` | Latest validated quote |
 | `GET` | `/api/history/AAPL?period=6mo` | Historical price and volume series |
 | `GET` | `/api/predict/AAPL` | Historical series plus LSTM forecast |
+| `GET` | `/api/news/AAPL?company=Apple%20Inc` | Recent company news from GDELT |
 
 Errors use a consistent shape:
 
