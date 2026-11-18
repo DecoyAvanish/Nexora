@@ -13,4 +13,5 @@ def health():
         "service": "nexora-api",
         "environment": settings.environment,
         "prediction_artifacts_available": current_app.extensions["prediction"].artifacts_available,
+        "cross_sectional_model_available": current_app.extensions["cross_sectional"].available,
     })

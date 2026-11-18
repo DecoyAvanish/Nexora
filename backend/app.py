@@ -16,10 +16,11 @@ from .services.market_data import MarketDataService
 from .services.news import NewsService
 from .services.sentiment import SentimentService
 from .services.scoring import StockScoringService
+from .services.cross_sectional import CrossSectionalScoreService
 from .services.prediction import PredictionService
 
 
-def create_app(settings: Settings | None = None, *, market_data=None, prediction=None, news=None, sentiment=None, scoring=None) -> Flask:
+def create_app(settings: Settings | None = None, *, market_data=None, prediction=None, news=None, sentiment=None, scoring=None, cross_sectional=None) -> Flask:
     app = Flask(__name__)
     resolved_settings = settings or Settings.from_env()
     app.config["SETTINGS"] = resolved_settings
@@ -29,6 +30,7 @@ def create_app(settings: Settings | None = None, *, market_data=None, prediction
     app.extensions["news"] = news or NewsService(resolved_settings.request_timeout_seconds)
     app.extensions["sentiment"] = sentiment or SentimentService()
     app.extensions["scoring"] = scoring or StockScoringService()
+    app.extensions["cross_sectional"] = cross_sectional or CrossSectionalScoreService(resolved_settings.model_artifact_root)
     app.register_blueprint(system_blueprint, url_prefix="/api")
     app.register_blueprint(market_blueprint, url_prefix="/api")
     app.register_blueprint(news_blueprint, url_prefix="/api")

@@ -17,6 +17,7 @@ class Settings:
     port: int
     allowed_origins: tuple[str, ...]
     request_timeout_seconds: float
+    model_artifact_root: str
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -26,4 +27,5 @@ class Settings:
             port=int(os.getenv("NEXORA_PORT", "5001")),
             allowed_origins=_csv(os.getenv("NEXORA_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")),
             request_timeout_seconds=float(os.getenv("NEXORA_REQUEST_TIMEOUT", "10")),
+            model_artifact_root=os.getenv("NEXORA_MODEL_ARTIFACT_ROOT", "artifacts/cross_sectional"),
         )

@@ -51,6 +51,8 @@ Open [http://localhost:3000](http://localhost:3000). The API listens on [http://
 | `GET` | `/api/sentiment/AAPL?company=Apple%20Inc` | FinBERT sentiment for recent real headlines |
 | `GET` | `/api/score/AAPL?company=Apple%20Inc` | Explainable 1–10 score and green/red signal |
 
+When a versioned cross-sectional artifact is present, `/api/score/:symbol` serves it as the primary production model and includes calibrated outperformance probability, universe percentile, sector percentile, model version, data-through date, baseline metrics, and LightGBM feature contributions. If no artifact has been published, the endpoint explicitly reports and uses the technical/news composite fallback.
+
 Errors use a consistent shape:
 
 ```json

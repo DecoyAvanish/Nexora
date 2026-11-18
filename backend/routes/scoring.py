@@ -12,9 +12,24 @@ def score_stock(symbol: str):
     normalized = normalize_symbol(symbol)
     company_name = request.args.get("company")
     history = current_app.extensions["market_data"].history(normalized, period="1y")
-    articles = current_app.extensions["news"].company_news(normalized, company_name, days=14, limit=50)
-    sentiment = current_app.extensions["sentiment"].analyze(articles)
-    score = current_app.extensions["scoring"].score(history, sentiment)
+    cross_sectional = current_app.extensions["cross_sectional"]
+    if cross_sectional.available:
+        score = cross_sectional.get_score(normalized)
+        sentiment = None
+        score_source = "production_cross_sectional_model"
+    else:
+        articles = current_app.extensions["news"].company_news(normalized, company_name, days=14, limit=50)
+        sentiment = current_app.extensions["sentiment"].analyze(articles)
+        score = current_app.extensions["scoring"].score(history, sentiment)
+        score.update({
+            "outperformance_probability": None,
+            "universe_percentile": None,
+            "sector_percentile": None,
+            "model_version": None,
+            "data_through": history.dates[-1],
+            "model_type": "technical_sentiment_fallback",
+        })
+        score_source = "fallback_composite"
     previous = history.closes[-2] if len(history.closes) > 1 else history.last_price
     return jsonify({
         "symbol": normalized,
@@ -26,5 +41,6 @@ def score_stock(symbol: str):
         "low": history.lows[-1],
         "chart_data": history.to_chart(),
         "sentiment": sentiment,
+        "score_source": score_source,
         **score,
     })
