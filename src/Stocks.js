@@ -65,6 +65,7 @@ function Stocks() {
   const [userHoldings, setUserHoldings] = useState([]);
   const [orderSuccess, setOrderSuccess] = useState(null);
   const [portfolioValue, setPortfolioValue] = useState(0);
+  const [fundamentals, setFundamentals] = useState(null);
 
   const searchTimeout = useRef(null);
 
@@ -115,12 +116,16 @@ function Stocks() {
     setLoading(true);
     setError(null);
     setOrderSuccess(null);
+    setFundamentals(null);
     try {
       const response = await axios.get(`${API_BASE}/score/${encodeURIComponent(symbol)}`, {
         timeout: 60000
       });
       setStockData(response.data);
       setSelectedStock({ symbol });
+      axios.get(`${API_BASE}/fundamentals/${encodeURIComponent(symbol)}`, { timeout: 60000 })
+        .then(({ data }) => setFundamentals(data))
+        .catch(() => setFundamentals(null));
     } catch (err) {
       console.error('Error fetching stock data:', err);
       
@@ -553,6 +558,28 @@ function Stocks() {
           }}>
             {orderSuccess}
           </div>
+        )}
+
+        {fundamentals && (
+          <section className="fundamental-panel" aria-label="SEC fundamental score drivers">
+            <div className="fundamental-heading">
+              <div><span>WHY THIS SCORE?</span><strong>Point-in-time SEC fundamentals</strong></div>
+              <small>Data available {new Date(fundamentals.as_of).toLocaleDateString()} · {fundamentals.reporting_lag_hours}h reporting lag</small>
+            </div>
+            <div className="driver-columns">
+              <div><h4 className="positive">Positive</h4>{fundamentals.drivers.positive.map((driver) => <p key={driver.metric}>+ {driver.text}</p>)}</div>
+              <div><h4 className="negative">Negative</h4>{fundamentals.drivers.negative.map((driver) => <p key={driver.metric}>− {driver.text}</p>)}</div>
+            </div>
+            <div className="filing-sources">
+              {Object.values(fundamentals.metrics).flatMap((metric) => metric.sources || [])
+                .filter((source, index, sources) => source.document_url && sources.findIndex((item) => item.document_url === source.document_url) === index)
+                .slice(0, 4).map((source) => (
+                  <a key={source.document_url} href={source.document_url} target="_blank" rel="noreferrer">
+                    {source.form} · {source.concept} · accepted {new Date(source.accepted_at).toLocaleDateString()} ↗
+                  </a>
+                ))}
+            </div>
+          </section>
         )}
 
         <div className="charts-container">

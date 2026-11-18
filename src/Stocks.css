@@ -866,6 +866,19 @@ body {
   animation-delay: 0.15s;
 }
 
+.fundamental-panel { margin: 18px 0; padding: 20px; border: 1px solid rgba(168,85,247,.16); border-radius: 14px; background: rgba(10,12,22,.76); }
+.fundamental-heading { display:flex; justify-content:space-between; gap:16px; margin-bottom:16px; }
+.fundamental-heading span { display:block; color:#a855f7; font: 9px var(--font-mono); letter-spacing:2px; }
+.fundamental-heading strong { display:block; margin-top:5px; color:#f0edff; }
+.fundamental-heading small { color:var(--text-muted); font:9px var(--font-mono); }
+.driver-columns { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.driver-columns h4 { margin:0 0 8px; font:11px var(--font-mono); text-transform:uppercase; letter-spacing:1px; }
+.driver-columns h4.positive { color:#4bff9b; } .driver-columns h4.negative { color:#ff5f76; }
+.driver-columns p { color:var(--text-secondary); font:11px/1.6 var(--font-mono); margin:4px 0; }
+.filing-sources { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; padding-top:12px; border-top:1px solid var(--border-hair); }
+.filing-sources a { color:#a98bc5; font:9px var(--font-mono); text-decoration:none; }
+.filing-sources a:hover { color:#c084fc; }
+
 .watchlist-header {
   display: flex;
   justify-content: space-between;
@@ -920,6 +933,7 @@ body {
   .prediction-grid { grid-template-columns: 1fr; }
   .price-chart { height: 220px; }
   .order-controls { flex-direction: column; }
+  .driver-columns { grid-template-columns:1fr; }
   .ring-1, .ring-2, .ring-3 { display: none; }
 }
 
