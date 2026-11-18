@@ -23,6 +23,7 @@ import {
   Filler
 } from 'chart.js';
 import { Chart } from 'react-chartjs-2';
+import ScoreExplanation from './ScoreExplanation';
 
 ChartJS.register(
   CategoryScale,
@@ -67,6 +68,7 @@ function Stocks() {
   const [portfolioValue, setPortfolioValue] = useState(0);
   const [fundamentals, setFundamentals] = useState(null);
   const [eventIntelligence, setEventIntelligence] = useState(null);
+  const [scoreExplanation, setScoreExplanation] = useState(null);
 
   const searchTimeout = useRef(null);
 
@@ -115,6 +117,7 @@ function Stocks() {
     setOrderSuccess(null);
     setFundamentals(null);
     setEventIntelligence(null);
+    setScoreExplanation(null);
     try {
       const response = await axios.get(`${API_BASE}/score/${encodeURIComponent(symbol)}`, {
         timeout: 60000
@@ -128,6 +131,9 @@ function Stocks() {
       axios.get(`${API_BASE}/events/${encodeURIComponent(symbol)}/explain?days=45`, { headers:eventHeaders, timeout:60000 })
         .then(({data}) => setEventIntelligence(data))
         .catch(() => setEventIntelligence(null));
+      axios.get(`${API_BASE}/explain/${encodeURIComponent(symbol)}`, { timeout:90000 })
+        .then(({data}) => setScoreExplanation(data))
+        .catch(() => setScoreExplanation(null));
     } catch (err) {
       console.error('Error fetching stock data:', err);
       
@@ -558,6 +564,8 @@ function Stocks() {
             </div>
           )}
         </div>
+
+        <ScoreExplanation data={scoreExplanation} />
 
         {eventIntelligence && (
           <section className="event-intelligence">
