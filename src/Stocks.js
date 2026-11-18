@@ -106,8 +106,8 @@ function Stocks() {
     setError(null);
     setOrderSuccess(null);
     try {
-      const response = await axios.get(`${API_BASE}/predict/${symbol}`, {
-        timeout: 15000
+      const response = await axios.get(`${API_BASE}/score/${encodeURIComponent(symbol)}`, {
+        timeout: 60000
       });
       setStockData(response.data);
       setSelectedStock({ symbol });
@@ -125,9 +125,9 @@ function Stocks() {
             name: symbol,
             last_price: quote.price,
             last_return: quote.previous_close ? (quote.price - quote.previous_close) / quote.previous_close : 0,
-            predicted_return: 0,
-            predicted_price: quote.price,
-            confidence: 0.5,
+            ai_score: null,
+            signal: null,
+            sentiment: null,
             chart_data: {
               dates: [new Date().toISOString().split('T')[0]],
               prices: [quote.price],
@@ -369,25 +369,6 @@ function Stocks() {
         pointHoverBackgroundColor: '#A855F7',
         pointHoverBorderColor: '#ffffff',
         pointHoverBorderWidth: 2,
-      },
-      {
-        label: 'AI Prediction',
-        data: [
-          ...stockData.chart_data.prices.slice(-1),
-          stockData.predicted_price
-        ],
-        borderColor: '#A855F7',
-        backgroundColor: 'rgba(168, 85, 247, 0.1)',
-        borderDash: [6, 4],
-        pointRadius: [0, 12],
-        pointBackgroundColor: ['transparent', '#A855F7'],
-        pointBorderColor: ['transparent', '#A855F7'],
-        pointHoverRadius: [0, 16],
-        pointHoverBackgroundColor: ['transparent', '#A855F7'],
-        pointHoverBorderColor: ['transparent', '#ffffff'],
-        pointHoverBorderWidth: [0, 3],
-        fill: false,
-        tension: 0.4,
       }
     ]
   } : null;
@@ -419,9 +400,6 @@ function Stocks() {
           label: function(context) {
             let label = context.dataset.label || '';
             let value = context.parsed.y;
-            if (label === 'AI Prediction' && context.dataIndex === context.dataset.data.length - 1) {
-              return `🤖 ${label}: $${value.toFixed(2)}`;
-            }
             return `${label}: $${value.toFixed(2)}`;
           }
         }
@@ -581,15 +559,15 @@ function Stocks() {
         <div className="stats-grid">
           <div className="stat-item">
             <span className="stat-label">Open</span>
-            <span className="stat-value">${(stockData.last_price * 0.98).toFixed(2)}</span>
+            <span className="stat-value">${(stockData.open || stockData.last_price)?.toFixed(2)}</span>
           </div>
           <div className="stat-item">
             <span className="stat-label">High</span>
-            <span className="stat-value">${(stockData.last_price * 1.03).toFixed(2)}</span>
+            <span className="stat-value">${(stockData.high || stockData.last_price)?.toFixed(2)}</span>
           </div>
           <div className="stat-item">
             <span className="stat-label">Low</span>
-            <span className="stat-value">${(stockData.last_price * 0.97).toFixed(2)}</span>
+            <span className="stat-value">${(stockData.low || stockData.last_price)?.toFixed(2)}</span>
           </div>
           <div className="stat-item">
             <span className="stat-label">Volume</span>
@@ -600,30 +578,53 @@ function Stocks() {
         <div className="prediction-section">
           <div className="prediction-header">
             <span className="prediction-icon">🧠</span>
-            <span className="prediction-title">AI FORECAST</span>
-            <span className="confidence-badge">
-              {((stockData.confidence || 0.85) * 100).toFixed(0)}% confidence
-            </span>
+            <span className="prediction-title">NEXORA AI SCORE</span>
+            {stockData.signal && (
+              <span className="confidence-badge" style={{ color: stockData.signal.hex, borderColor: stockData.signal.hex }}>
+                {stockData.signal.label}
+              </span>
+            )}
           </div>
           <div className="prediction-grid">
             <div className="prediction-card">
-              <span className="prediction-label">Current</span>
-              <span className="prediction-value">${stockData.last_price?.toFixed(2)}</span>
+              <span className="prediction-label">AI Score</span>
+              <span className="prediction-value" style={{ color: stockData.signal?.hex || '#f0edff' }}>
+                {stockData.ai_score ? `${stockData.ai_score}/10` : 'N/A'}
+              </span>
             </div>
             <div className="prediction-card highlight">
-              <span className="prediction-label">Predicted</span>
-              <span className="prediction-value predicted">${stockData.predicted_price?.toFixed(2)}</span>
+              <span className="prediction-label">Technical</span>
+              <span className="prediction-value predicted">{stockData.components?.technical?.toFixed(0) || 'N/A'}</span>
             </div>
             <div className="prediction-card">
-              <span className="prediction-label">Return</span>
-              <span className={`prediction-value ${stockData.predicted_return >= 0 ? 'positive' : 'negative'}`}>
-                {(stockData.predicted_return * 100).toFixed(2)}%
+              <span className="prediction-label">News Sentiment</span>
+              <span className={`prediction-value ${stockData.sentiment?.sentiment_score >= 0 ? 'positive' : 'negative'}`}>
+                {stockData.sentiment ? `${stockData.sentiment.label.toUpperCase()} (${stockData.sentiment.article_count})` : 'N/A'}
               </span>
             </div>
           </div>
           <div className="prediction-note">
-            LSTM neural network • {stockData.chart_data?.dates?.length || 0} training samples
+            FinBERT news sentiment • Multi-window technical factors • Not financial advice
           </div>
+          {stockData.top_drivers?.length > 0 && (
+            <div className="prediction-note">
+              Top factors: {stockData.top_drivers.slice(0, 3).map(driver =>
+                `${driver.direction === 'positive' ? '🟢' : '🔴'} ${driver.name.replaceAll('_', ' ')}`
+              ).join(' • ')}
+            </div>
+          )}
+          {stockData.sentiment?.articles?.length > 0 && (
+            <div className="prediction-note">
+              Latest news: {stockData.sentiment.articles.slice(0, 3).map((article, index) => (
+                <span key={article.url}>
+                  {index > 0 ? ' • ' : ''}
+                  <a href={article.url} target="_blank" rel="noreferrer" style={{ color: article.sentiment === 'positive' ? '#4bff9b' : article.sentiment === 'negative' ? '#fb7185' : '#c4b5fd' }}>
+                    {article.title}
+                  </a>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="trading-panel">
@@ -797,7 +798,7 @@ function Stocks() {
             </div>
           </div>
           <h2>Search for a stock</h2>
-          <p>Get AI-powered predictions and real-time market data</p>
+          <p>Get news-aware AI scores, green/red signals, and real-time market data</p>
           <div className="quick-stocks">
             <span>Quick access:</span>
             {['AAPL', 'MSFT', 'TSLA', 'GOOGL', 'AMZN', 'NVDA'].map((symbol) => (
