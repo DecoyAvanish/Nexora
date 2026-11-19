@@ -8,7 +8,7 @@ const percent=(value)=>`${(value*100).toFixed(1)}%`;
 
 export default function RiskLab(){
   const [data,setData]=useState(null); const [error,setError]=useState('');
-  useEffect(()=>{(async()=>{try{const token=await auth.currentUser.getIdToken(); const response=await axios.get(`${API_BASE}/risk/portfolio`,{headers:{Authorization:`Bearer ${token}`},timeout:90000}); setData(response.data);}catch(err){setError(err.response?.data?.error?.message||'Risk analytics are unavailable.');}})();},[]);
+  useEffect(()=>{(async()=>{try{const currentUser=auth.currentUser;const token=currentUser?await currentUser.getIdToken():null;const endpoint=currentUser?'risk/portfolio':'risk/demo';const response=await axios.get(`${API_BASE}/${endpoint}`,{headers:token?{Authorization:`Bearer ${token}`}:{},timeout:90000}); setData(response.data);}catch(err){setError(err.response?.data?.error?.message||'Risk analytics are unavailable.');}})();},[]);
   if(error)return <main className="risk-page"><div className="risk-empty">{error}</div></main>;
   if(!data)return <main className="risk-page"><div className="risk-empty">Running portfolio simulations…</div></main>;
   if(data.status==='empty')return <main className="risk-page"><div className="risk-empty">{data.message}</div></main>;

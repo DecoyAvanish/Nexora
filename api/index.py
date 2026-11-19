@@ -123,6 +123,43 @@ def status() -> dict:
     }
 
 
+def risk_demo() -> dict:
+    return {
+        "as_of": "2026-11-17",
+        "demo": True,
+        "metrics": {
+            "beta_vs_spy": 1.18,
+            "annualized_volatility": 0.247,
+            "sharpe": 1.12,
+            "sortino": 1.47,
+            "var_95_daily": -0.024,
+            "expected_shortfall_95": -0.037,
+            "maximum_drawdown": -0.184,
+            "diversification_score": 61,
+        },
+        "warnings": [
+            {"title": "HIGH CONCENTRATION RISK", "message": "62% of portfolio value is exposed to technology."},
+            {"title": "CORRELATION WARNING", "message": "AAPL, MSFT, and NVDA contribute 78% of estimated portfolio variance."},
+        ],
+        "sector_exposure": {"Technology": 0.62, "Consumer Discretionary": 0.18, "Communication Services": 0.12, "Cash": 0.08},
+        "monte_carlo": {"horizon_days": 63, "p05_return": -0.173, "median_return": 0.031, "p95_return": 0.246, "simulations": 10000, "probability_of_loss": 0.39},
+        "stress_tests": [
+            {"scenario": "S&P 500 falls 10%", "estimated_return": -0.118},
+            {"scenario": "Technology sector falls 20%", "estimated_return": -0.151},
+            {"scenario": "Rates increase 100 basis points", "estimated_return": -0.046},
+            {"scenario": "Volatility doubles", "estimated_return": -0.092},
+            {"scenario": "Oil increases 30%", "estimated_return": -0.021},
+            {"scenario": "2008-style correlation shock", "estimated_return": -0.264},
+        ],
+        "correlation": {
+            "symbols": ["AAPL", "MSFT", "NVDA"],
+            "matrix": [[1.0, 0.71, 0.64], [0.71, 1.0, 0.68], [0.64, 0.68, 1.0]],
+        },
+        "partial": True,
+        "reason": "read_only_seeded_portfolio",
+    }
+
+
 def live_quote(symbol: str) -> dict:
     symbol = symbol.upper()
     url = f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(symbol)}?range=5d&interval=1d"
@@ -210,6 +247,8 @@ class handler(BaseHTTPRequestHandler):
                 return self.send_json(demo())
             if path == "status":
                 return self.send_json(status())
+            if path == "risk/demo":
+                return self.send_json(risk_demo())
             if path.startswith("quote/"):
                 return self.send_json(live_quote(path.split("/", 1)[1]))
             if path.startswith("search/"):
