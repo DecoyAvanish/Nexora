@@ -19,6 +19,7 @@ function Header({ onNavigate, currentPage, user, onLogout }) {
     { id: 'status', label: 'Status' },
     { id: 'demo', label: 'Demo' },
   ];
+  const routeHash = (id) => ({ modelLab: 'model-lab', modelCard: 'model-card' }[id] || id);
 
   useEffect(() => {
     const close = (event) => {
@@ -58,7 +59,7 @@ function Header({ onNavigate, currentPage, user, onLogout }) {
               {primaryItems.map((item) => (
                 <a
                   key={item.id}
-                  href={`#${item.id}`}
+                  href={`#${routeHash(item.id)}`}
                   onClick={(e) => handleNavClick(e, item.id)}
                   className={currentPage === item.id ? 'active' : ''}
                 >
@@ -80,7 +81,7 @@ function Header({ onNavigate, currentPage, user, onLogout }) {
                     {secondaryItems.map(item => (
                       <a
                         key={item.id}
-                        href={`#${item.id}`}
+                        href={`#${routeHash(item.id)}`}
                         onClick={(event) => handleNavClick(event, item.id)}
                         className={currentPage === item.id ? 'active' : ''}
                       >

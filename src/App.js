@@ -124,7 +124,7 @@ function App() {
 
   const renderContent = () => {
     if (currentPage === 'modelLab') return <ModelLab />;
-    if (['modelCard','architecture','status','demo'].includes(currentPage)) return <PublicShowcase page={currentPage} onNavigate={handleNavigate} />;
+    if (['modelCard','architecture','status','demo'].includes(currentPage)) return <PublicShowcase key={currentPage} page={currentPage} onNavigate={handleNavigate} />;
     if (!user && !GUEST_TEST_ROUTES.has(currentPage)) {
       if (showAuth === 'signup') {
         return (
