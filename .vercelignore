@@ -1,0 +1,12 @@
+# The Vercel project hosts the React client only. The Flask/ML service is
+# deployed separately so Vercel does not attempt to resolve heavyweight
+# Python dependencies while building the frontend.
+backend/
+artifacts/
+data/
+tests/
+src/prediction_api.py
+requirements.txt
+requirements-dev.txt
+Dockerfile
+docker-compose.yml
