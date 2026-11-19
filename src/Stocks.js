@@ -237,16 +237,17 @@ function Stocks() {
     fetchStockData(stock.symbol);
   };
 
-  const chartData = stockData?.chart_data ? {
+  const hasChartData = Boolean(stockData?.chart_data?.dates?.length && stockData?.chart_data?.prices?.length);
+  const chartData = hasChartData ? {
     labels: stockData.chart_data.dates,
     datasets: [
       {
-        label: 'Price',
+        label: 'Daily close',
         data: stockData.chart_data.prices,
         borderColor: '#A855F7',
         backgroundColor: 'rgba(168, 85, 247, 0.05)',
         fill: true,
-        tension: 0.4,
+        tension: 0,
         pointRadius: 0,
         pointHoverRadius: 8,
         pointHoverBackgroundColor: '#A855F7',
@@ -301,7 +302,7 @@ function Stocks() {
     interaction: { intersect: false, mode: 'index' }
   };
 
-  const volumeData = stockData?.chart_data ? {
+  const volumeData = hasChartData ? {
     labels: stockData.chart_data.dates,
     datasets: [{
       label: 'Volume',
@@ -451,9 +452,12 @@ function Stocks() {
         )}
 
         <div className="charts-container">
-          <div className="price-chart">
+          {chartData ? <div className="price-chart">
             <Chart type="line" data={chartData} options={chartOptions} />
-          </div>
+            <small>Actual daily closes · {stockData.chart_data.source} · through {stockData.chart_data.data_through}</small>
+          </div> : <div className="price-chart chart-unavailable">
+            Historical chart unavailable — {stockData.chart_unavailable_reason || 'the market-data provider returned no observations.'}
+          </div>}
           {volumeData && (
             <div className="volume-chart">
               <Chart type="bar" data={volumeData} options={volumeOptions} />

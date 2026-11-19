@@ -181,17 +181,46 @@ def live_quote(symbol: str) -> dict:
         return {**fallback, "previous_close": previous, "open": previous, "high": max(price, previous) * 1.006, "low": min(price, previous) * 0.994, "volume": 0, "source": "versioned_demo_snapshot", "partial": True, "data_through": "2026-11-17"}
 
 
+def market_history(symbol: str) -> dict:
+    """Return real daily market observations; never manufacture chart points."""
+    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(symbol)}?range=3mo&interval=1d&events=div%2Csplits"
+    request = Request(url, headers={"User-Agent": "Nexora/1.0 avanishpakalapati@gmail.com"})
+    with urlopen(request, timeout=8) as response:
+        chart = json.load(response)["chart"]["result"][0]
+    quote_series = chart["indicators"]["quote"][0]
+    observations = []
+    for timestamp, close, volume in zip(chart["timestamp"], quote_series["close"], quote_series["volume"]):
+        if close is None:
+            continue
+        observations.append({
+            "date": datetime.fromtimestamp(timestamp, timezone.utc).date().isoformat(),
+            "price": round(float(close), 4),
+            "volume": int(volume or 0),
+        })
+    if len(observations) < 2:
+        raise ValueError("insufficient market history")
+    return {
+        "dates": [point["date"] for point in observations],
+        "prices": [point["price"] for point in observations],
+        "volume": [point["volume"] for point in observations],
+        "source": "Yahoo Finance",
+        "interval": "1d",
+        "data_through": observations[-1]["date"],
+    }
+
+
 def score_snapshot(symbol: str) -> Optional[dict]:
     symbol = symbol.upper()
     score = SAMPLE_SCORES.get(symbol)
     quote_data = SAMPLE_QUOTES.get(symbol)
     if not score or not quote_data:
         return None
-    price = quote_data["price"]
-    previous = price - quote_data["change"]
-    dates = [f"2026-10-{day:02d}" for day in range(20, 32)] + [f"2026-11-{day:02d}" for day in range(1, 18)]
-    prices = [round(price * (0.94 + index * 0.0024 + ((index % 5) - 2) * 0.0015), 2) for index in range(len(dates))]
-    prices[-1] = price
+    try:
+        history = market_history(symbol)
+    except (HTTPError, URLError, TimeoutError, KeyError, TypeError, ValueError):
+        history = None
+    price = history["prices"][-1] if history else quote_data["price"]
+    previous = history["prices"][-2] if history else price - quote_data["change"]
     tone = "positive" if score["ai_score"] >= 7 else "negative" if score["ai_score"] <= 4 else "neutral"
     return {
         "symbol": symbol,
@@ -201,7 +230,8 @@ def score_snapshot(symbol: str) -> Optional[dict]:
         "open": previous,
         "high": max(price, previous) * 1.006,
         "low": min(price, previous) * 0.994,
-        "chart_data": {"dates": dates, "prices": prices, "volume": [0] * len(dates)},
+        "chart_data": history,
+        "chart_unavailable_reason": None if history else "Historical market data provider is temporarily unavailable.",
         **score,
         "signal": {"label": "Historically favorable" if tone == "positive" else "Historically unfavorable" if tone == "negative" else "Mixed", "hex": "#4bff9b" if tone == "positive" else "#fb7185" if tone == "negative" else "#f59e0b"},
         "top_drivers": [
@@ -210,9 +240,9 @@ def score_snapshot(symbol: str) -> Optional[dict]:
             {"name": "sector_relative_strength", "direction": "positive" if score["sector_percentile"] >= 50 else "negative"},
         ],
         "model_version": "2026.11.17",
-        "data_through": "2026-11-17",
-        "partial": True,
-        "reason": "versioned_public_snapshot",
+        "data_through": history["data_through"] if history else "2026-11-17",
+        "partial": history is None,
+        "reason": None if history else "market_history_provider_unavailable",
     }
 
 
