@@ -24,7 +24,7 @@
     0 0 80px rgba(168, 85, 247, 0.02);
   pointer-events: all;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
