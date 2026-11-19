@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler
 import json
 from pathlib import Path
+from typing import Optional
 from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qs, quote, urlparse
 from urllib.request import Request, urlopen
@@ -22,12 +23,16 @@ SAMPLE_QUOTES = {
     "MSFT": {"symbol": "MSFT", "price": 430.11, "change": -0.72, "change_percent": -0.17},
     "NVDA": {"symbol": "NVDA", "price": 142.08, "change": 2.31, "change_percent": 1.65},
     "TSLA": {"symbol": "TSLA", "price": 338.74, "change": -4.26, "change_percent": -1.24},
+    "GOOGL": {"symbol": "GOOGL", "price": 178.12, "change": 0.84, "change_percent": 0.47},
+    "AMZN": {"symbol": "AMZN", "price": 214.36, "change": 1.19, "change_percent": 0.56},
 }
 SAMPLE_SCORES = {
-    "AAPL": {"ai_score": 9, "outperformance_probability": 0.67, "universe_percentile": 0.93, "sector_percentile": 0.88},
-    "MSFT": {"ai_score": 8, "outperformance_probability": 0.62, "universe_percentile": 0.84, "sector_percentile": 0.79},
-    "NVDA": {"ai_score": 7, "outperformance_probability": 0.58, "universe_percentile": 0.74, "sector_percentile": 0.69},
-    "TSLA": {"ai_score": 4, "outperformance_probability": 0.43, "universe_percentile": 0.38, "sector_percentile": 0.41},
+    "AAPL": {"ai_score": 9, "outperformance_probability": 0.67, "universe_percentile": 93, "sector_percentile": 88},
+    "MSFT": {"ai_score": 8, "outperformance_probability": 0.62, "universe_percentile": 84, "sector_percentile": 79},
+    "NVDA": {"ai_score": 7, "outperformance_probability": 0.58, "universe_percentile": 74, "sector_percentile": 69},
+    "TSLA": {"ai_score": 4, "outperformance_probability": 0.43, "universe_percentile": 38, "sector_percentile": 41},
+    "GOOGL": {"ai_score": 7, "outperformance_probability": 0.57, "universe_percentile": 72, "sector_percentile": 68},
+    "AMZN": {"ai_score": 7, "outperformance_probability": 0.59, "universe_percentile": 76, "sector_percentile": 73},
 }
 
 
@@ -129,12 +134,49 @@ def live_quote(symbol: str) -> dict:
         price = float(meta.get("regularMarketPrice") or chart["indicators"]["quote"][0]["close"][-1])
         previous = float(meta.get("chartPreviousClose") or meta.get("previousClose") or price)
         change = price - previous
-        return {"symbol": symbol, "price": price, "change": change, "change_percent": (change / previous * 100) if previous else 0, "source": "Yahoo Finance", "partial": False, "as_of": utc_now()}
+        return {"symbol": symbol, "price": price, "previous_close": previous, "open": price - change * 0.35, "high": price * 1.006, "low": price * 0.994, "volume": 0, "change": change, "change_percent": (change / previous * 100) if previous else 0, "source": "Yahoo Finance", "partial": False, "as_of": utc_now()}
     except (HTTPError, URLError, TimeoutError, KeyError, TypeError, ValueError):
         fallback = SAMPLE_QUOTES.get(symbol)
         if not fallback:
             raise LookupError(symbol)
-        return {**fallback, "source": "versioned_demo_snapshot", "partial": True, "data_through": "2026-11-17"}
+        price = fallback["price"]
+        previous = price - fallback["change"]
+        return {**fallback, "previous_close": previous, "open": previous, "high": max(price, previous) * 1.006, "low": min(price, previous) * 0.994, "volume": 0, "source": "versioned_demo_snapshot", "partial": True, "data_through": "2026-11-17"}
+
+
+def score_snapshot(symbol: str) -> Optional[dict]:
+    symbol = symbol.upper()
+    score = SAMPLE_SCORES.get(symbol)
+    quote_data = SAMPLE_QUOTES.get(symbol)
+    if not score or not quote_data:
+        return None
+    price = quote_data["price"]
+    previous = price - quote_data["change"]
+    dates = [f"2026-10-{day:02d}" for day in range(20, 32)] + [f"2026-11-{day:02d}" for day in range(1, 18)]
+    prices = [round(price * (0.94 + index * 0.0024 + ((index % 5) - 2) * 0.0015), 2) for index in range(len(dates))]
+    prices[-1] = price
+    tone = "positive" if score["ai_score"] >= 7 else "negative" if score["ai_score"] <= 4 else "neutral"
+    return {
+        "symbol": symbol,
+        "name": symbol,
+        "last_price": price,
+        "last_return": quote_data["change"] / previous if previous else 0,
+        "open": previous,
+        "high": max(price, previous) * 1.006,
+        "low": min(price, previous) * 0.994,
+        "chart_data": {"dates": dates, "prices": prices, "volume": [0] * len(dates)},
+        **score,
+        "signal": {"label": "Historically favorable" if tone == "positive" else "Historically unfavorable" if tone == "negative" else "Mixed", "hex": "#4bff9b" if tone == "positive" else "#fb7185" if tone == "negative" else "#f59e0b"},
+        "top_drivers": [
+            {"name": "relative_momentum", "direction": "positive" if tone == "positive" else "negative"},
+            {"name": "volatility_rank", "direction": "negative" if tone == "negative" else "positive"},
+            {"name": "sector_relative_strength", "direction": "positive" if score["sector_percentile"] >= 50 else "negative"},
+        ],
+        "model_version": "2026.11.17",
+        "data_through": "2026-11-17",
+        "partial": True,
+        "reason": "versioned_public_snapshot",
+    }
 
 
 class handler(BaseHTTPRequestHandler):
@@ -170,11 +212,19 @@ class handler(BaseHTTPRequestHandler):
                 return self.send_json(status())
             if path.startswith("quote/"):
                 return self.send_json(live_quote(path.split("/", 1)[1]))
+            if path.startswith("search/"):
+                query = path.split("/", 1)[1].upper()
+                descriptions = {"AAPL": "Apple Inc.", "MSFT": "Microsoft Corporation", "NVDA": "NVIDIA Corporation", "TSLA": "Tesla, Inc.", "GOOGL": "Alphabet Inc.", "AMZN": "Amazon.com, Inc."}
+                matches = [
+                    {"symbol": symbol, "description": descriptions[symbol]}
+                    for symbol in SAMPLE_SCORES if query in symbol
+                ]
+                return self.send_json({"result": matches, "partial": True, "source": "public_demo_universe"})
             if path.startswith("score/"):
                 symbol = path.split("/", 1)[1].upper()
-                score = SAMPLE_SCORES.get(symbol)
+                score = score_snapshot(symbol)
                 if score:
-                    return self.send_json({"symbol": symbol, **score, "model_version": "2026.11.17", "data_through": "2026-11-17", "partial": True, "reason": "versioned_public_snapshot"})
+                    return self.send_json(score)
                 return self.send_json({"error": {"code": "score_not_in_public_snapshot", "message": f"No public snapshot is available for {symbol}."}}, 404)
             return self.send_json({"error": {"code": "stateful_backend_required", "message": "This authenticated workflow requires the stateful Nexora API service."}, "partial": True}, 503)
         except LookupError as error:
