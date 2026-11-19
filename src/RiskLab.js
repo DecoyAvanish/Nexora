@@ -3,7 +3,7 @@ import axios from 'axios';
 import { auth } from './firebase';
 import './RiskLab.css';
 
-const API_BASE=process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001/api';
+const API_BASE=process.env.REACT_APP_API_BASE_URL || '/api';
 const percent=(value)=>`${(value*100).toFixed(1)}%`;
 
 export default function RiskLab(){

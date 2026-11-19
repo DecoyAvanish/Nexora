@@ -4,7 +4,7 @@ import axios from 'axios';
 import StatsRow from './StatsRow';
 import { database, auth, doc, onSnapshot } from './firebase';
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001/api';
+const API_BASE = process.env.REACT_APP_API_BASE_URL || '/api';
 
 function Stats() {
   const [stockData, setStockData] = useState([]);

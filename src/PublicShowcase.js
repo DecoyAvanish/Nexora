@@ -1,5 +1,5 @@
 import React,{useEffect,useState} from 'react';import axios from 'axios';import './PublicShowcase.css';
-const API=process.env.REACT_APP_API_BASE_URL||'http://localhost:5001/api';
+const API=process.env.REACT_APP_API_BASE_URL||'/api';
 const Card=({label,value})=><article className="showcase-card"><span>{label}</span><strong>{value}</strong></article>;
 const Hero=({eyebrow,title,text})=><header><span>{eyebrow}</span><h1>{title}</h1><p>{text}</p></header>;
 export default function PublicShowcase({page,onNavigate}){const [data,setData]=useState(null),[selected,setSelected]=useState(null);useEffect(()=>{const endpoint=page==='modelCard'?'public/model-card':page==='architecture'?'public/architecture':page==='demo'?'public/demo':'status';axios.get(`${API}/${endpoint}`).then(r=>setData(r.data)).catch(()=>setData({error:'This public view is temporarily unavailable.'}));},[page]);if(!data)return <main className="public-showcase"><p>Loading verified project data…</p></main>;if(data.error)return <main className="public-showcase"><p>{data.error}</p></main>;

@@ -3,7 +3,7 @@ import 'chart.js/auto';
 import { Bar, Line, Scatter } from 'react-chartjs-2';
 import './ModelLab.css';
 
-const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001/api';
+const API_BASE = process.env.REACT_APP_API_BASE_URL || '/api';
 const pct = (value, digits = 1) => value == null ? 'N/A' : `${(value * 100).toFixed(digits)}%`;
 const number = (value, digits = 3) => value == null ? 'N/A' : Number(value).toFixed(digits);
 const strategyLabel = (name) => ({
