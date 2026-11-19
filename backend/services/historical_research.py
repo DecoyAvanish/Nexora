@@ -19,6 +19,8 @@ class HistoricalResearchService:
             if not manifest_path.exists():raise ApiError("No historical model artifact is available.",503,"history_unavailable")
             manifest=json.loads(manifest_path.read_text()); version=self.root/manifest["model_version"]
             path=version/"walk_forward_scores.csv"
+            if not path.exists():
+                path = version / "walk_forward_scores.csv.gz"
             if not path.exists():raise ApiError("Walk-forward score history is not installed on this deployment.",503,"history_unavailable")
             frame=pd.read_csv(path); frame["date"]=pd.to_datetime(frame["date"],utc=True); frame["ticker"]=frame["ticker"].str.upper()
             if self.feature_path.exists():
