@@ -252,6 +252,8 @@ class handler(BaseHTTPRequestHandler):
         """Forward public calculations to the data-bearing research service."""
         from urllib.parse import urlencode
         origin = os.environ.get("NEXORA_RESEARCH_API_BASE", "").rstrip("/")
+        if not origin and os.getenv("VERCEL_ENV") == "preview" and os.getenv("VERCEL_GIT_COMMIT_REF") == "research-preview":
+            origin = "https://nexora-research-staging.onrender.com/api"
         if not origin.startswith("https://"):
             return self.send_json({"error": {"message": "Research service is not connected to this deployment."}}, 503)
         target = origin + "/" + path
