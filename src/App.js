@@ -14,14 +14,18 @@ import RiskLab from './RiskLab';
 import ResearchLab from './ResearchLab';
 import DecisionLab from './DecisionLab';
 import PublicShowcase from './PublicShowcase';
+import AppErrorBoundary from './AppErrorBoundary';
 import { auth, onAuthStateChanged } from './firebase';
 
-const PUBLIC_HASHES = {'#model-lab':'modelLab','#model-card':'modelCard','#architecture':'architecture','#status':'status','#demo':'demo'};
+const ROUTE_HASHES = {'#portfolio':'portfolio','#stocks':'stocks','#cash':'cash','#risk':'risk','#research':'research','#decisions':'decisions','#model-lab':'modelLab','#model-card':'modelCard','#architecture':'architecture','#status':'status','#demo':'demo'};
+const HASHES_BY_ROUTE = Object.fromEntries(Object.entries(ROUTE_HASHES).map(([hash, route]) => [route, hash.slice(1)]));
+const GUEST_TEST_ROUTES = new Set(['stocks', 'cash', 'risk', 'research', 'decisions', 'modelLab', 'modelCard', 'architecture', 'status', 'demo']);
 
 function App() {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(PUBLIC_HASHES[window.location.hash] || 'portfolio');
+  const initialRoute = ROUTE_HASHES[window.location.hash] || 'portfolio';
+  const [loading, setLoading] = useState(!GUEST_TEST_ROUTES.has(initialRoute));
+  const [currentPage, setCurrentPage] = useState(initialRoute);
   const [showAuth, setShowAuth] = useState('login');
 
   const orbs = Array.from({ length: 4 }, (_, i) => {
@@ -42,7 +46,9 @@ function App() {
   }));
 
   useEffect(() => {
+    const timeout = window.setTimeout(() => setLoading(false), 2500);
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      window.clearTimeout(timeout);
       setUser(user);
       setLoading(false);
       if (user) {
@@ -50,20 +56,21 @@ function App() {
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      window.clearTimeout(timeout);
+      unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
-    const handleHashChange = () => setCurrentPage(PUBLIC_HASHES[window.location.hash] || 'portfolio');
+    const handleHashChange = () => setCurrentPage(ROUTE_HASHES[window.location.hash] || 'portfolio');
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   const handleNavigate = (page) => {
     setCurrentPage(page);
-    const hashes={modelLab:'model-lab',modelCard:'model-card',architecture:'architecture',status:'status',demo:'demo'};
-    if (hashes[page]) window.location.hash = hashes[page];
-    else if (window.location.hash) window.history.replaceState(null, '', window.location.pathname);
+    if (HASHES_BY_ROUTE[page]) window.location.hash = HASHES_BY_ROUTE[page];
   };
 
   const handleLogin = () => {
@@ -118,7 +125,7 @@ function App() {
   const renderContent = () => {
     if (currentPage === 'modelLab') return <ModelLab />;
     if (['modelCard','architecture','status','demo'].includes(currentPage)) return <PublicShowcase page={currentPage} onNavigate={handleNavigate} />;
-    if (!user) {
+    if (!user && !GUEST_TEST_ROUTES.has(currentPage)) {
       if (showAuth === 'signup') {
         return (
           <SignUp 
@@ -171,7 +178,7 @@ function App() {
   }
 
   // Check if user is authenticated and on a page that should show the header
-  const showHeader = ['modelLab','modelCard','architecture','status','demo'].includes(currentPage) || (user && ['portfolio', 'stocks', 'cash', 'risk', 'research', 'decisions', 'account'].includes(currentPage));
+  const showHeader = GUEST_TEST_ROUTES.has(currentPage) || (user && ['portfolio', 'account'].includes(currentPage));
 
   return (
     <div className="App">
@@ -187,7 +194,7 @@ function App() {
           />
         </div>
       )}
-      {renderContent()}
+      <AppErrorBoundary resetKey={currentPage}>{renderContent()}</AppErrorBoundary>
     </div>
   );
 }
