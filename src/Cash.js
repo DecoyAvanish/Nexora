@@ -71,7 +71,7 @@ const Cash = () => {
     { id: 5, type: 'withdraw', amount: 1500, date: '2026-07-28', status: 'completed', method: 'Bank Transfer' },
   ]);
 
-  const [paymentMethods, setPaymentMethods] = useState([
+  const [paymentMethods] = useState([
     { id: 1, type: 'Bank Account', name: 'Chase Bank', last4: '4829', default: true },
     { id: 2, type: 'Credit Card', name: 'Visa', last4: '2345', default: false },
     { id: 3, type: 'Wire Transfer', name: 'Wells Fargo', last4: '6781', default: false },

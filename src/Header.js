@@ -45,7 +45,7 @@ function Header({ onNavigate, currentPage, user, onLogout }) {
               {navItems.map((item) => (
                 <a
                   key={item.id}
-                  href="#"
+                  href={`#${item.id}`}
                   onClick={(e) => handleNavClick(e, item.id)}
                   className={currentPage === item.id ? 'active' : ''}
                 >
