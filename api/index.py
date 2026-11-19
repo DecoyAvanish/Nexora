@@ -10,6 +10,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler
 import json
+import os
 from pathlib import Path
 from typing import Optional
 from urllib.error import HTTPError, URLError
@@ -247,6 +248,37 @@ def score_snapshot(symbol: str) -> Optional[dict]:
 
 
 class handler(BaseHTTPRequestHandler):
+    def research(self, path, query):
+        """Forward public calculations to the data-bearing research service."""
+        from urllib.parse import urlencode
+        origin = os.environ.get("NEXORA_RESEARCH_API_BASE", "").rstrip("/")
+        if not origin.startswith("https://"):
+            return self.send_json({"error": {"message": "Research service is not connected to this deployment."}}, 503)
+        target = origin + "/" + path
+        if self.command == "GET":
+            target += "?" + urlencode({"date": query.get("date", [""])[0]})
+        try:
+            size = int(self.headers.get("Content-Length", "0"))
+            if not 0 <= size <= 16384:
+                return self.send_json({"error": {"message": "Request too large."}}, 413)
+            body = self.rfile.read(size) if self.command == "POST" else None
+            req = Request(target, data=body, headers={"Content-Type": "application/json"}, method=self.command)
+            with urlopen(req, timeout=25) as result:
+                content = result.read()
+                self.send_response(200)
+                self.send_header("Content-Type", result.headers.get_content_type())
+                self.send_header("Cache-Control", "no-store")
+                self.end_headers()
+                self.wfile.write(content)
+        except HTTPError as error:
+            try:
+                message = json.load(error)["error"]["message"]
+            except (KeyError, ValueError, TypeError):
+                message = "Research service could not complete the calculation."
+            self.send_json({"error": {"message": message}}, error.code)
+        except (ValueError, OSError):
+            self.send_json({"error": {"message": "Research service is unreachable."}}, 503)
+
     def send_json(self, payload: dict, status_code: int = 200) -> None:
         body = json.dumps(payload, separators=(",", ":")).encode("utf-8")
         self.send_response(status_code)
@@ -263,7 +295,9 @@ class handler(BaseHTTPRequestHandler):
         return path, query
 
     def do_GET(self) -> None:
-        path, _ = self.route()
+        path, query = self.route()
+        if path.startswith("replay/") and path[7:].isascii() and path[7:].isalpha():
+            return self.research(path, query)
         try:
             if path in {"", "health"}:
                 return self.send_json({"status": "ok", "service": "nexora-public-api", "mode": "read_only", "time": utc_now()})
@@ -302,4 +336,7 @@ class handler(BaseHTTPRequestHandler):
             return self.send_json({"error": {"code": "public_api_error", "message": "The public data service could not complete this request."}, "partial": True}, 500)
 
     def do_POST(self) -> None:
+        path, query = self.route()
+        if path in {"strategy/backtest", "strategy/backtest.csv", "portfolio/optimize", "watchlist/intelligence"}:
+            return self.research(path, query)
         self.send_json({"error": {"code": "read_only_deployment", "message": "State-changing actions are disabled in the public deployment."}, "partial": True}, 503)
