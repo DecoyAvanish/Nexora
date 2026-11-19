@@ -1,23 +1,36 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './Header.css';
 
 function Header({ onNavigate, currentPage, user, onLogout }) {
-  const navItems = [
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreRef = useRef(null);
+  const primaryItems = [
     { id: 'portfolio', label: 'Portfolio' },
     { id: 'stocks', label: 'Stocks' },
+    { id: 'research', label: 'Research' },
+    { id: 'modelLab', label: 'Model Lab' },
+  ];
+  const secondaryItems = [
     { id: 'cash', label: 'Cash' },
     { id: 'risk', label: 'Risk Lab' },
-    { id: 'research', label: 'Research' },
     { id: 'decisions', label: 'Decision Lab' },
-    { id: 'modelLab', label: 'Model Lab' },
     { id: 'modelCard', label: 'Model Card' },
     { id: 'architecture', label: 'Architecture' },
     { id: 'status', label: 'Status' },
     { id: 'demo', label: 'Demo' },
   ];
 
+  useEffect(() => {
+    const close = (event) => {
+      if (moreRef.current && !moreRef.current.contains(event.target)) setMoreOpen(false);
+    };
+    document.addEventListener('pointerdown', close);
+    return () => document.removeEventListener('pointerdown', close);
+  }, []);
+
   const handleNavClick = (e, id) => {
     e.preventDefault();
+    setMoreOpen(false);
     if (onNavigate) {
       onNavigate(id);
     }
@@ -42,7 +55,7 @@ function Header({ onNavigate, currentPage, user, onLogout }) {
             </div>
             
             <div className="menu">
-              {navItems.map((item) => (
+              {primaryItems.map((item) => (
                 <a
                   key={item.id}
                   href={`#${item.id}`}
@@ -52,6 +65,31 @@ function Header({ onNavigate, currentPage, user, onLogout }) {
                   {item.label}
                 </a>
               ))}
+
+              <div className="more-menu" ref={moreRef}>
+                <button
+                  type="button"
+                  className={`more-trigger ${secondaryItems.some(item => item.id === currentPage) ? 'active' : ''}`}
+                  aria-expanded={moreOpen}
+                  onClick={() => setMoreOpen(open => !open)}
+                >
+                  More <span aria-hidden="true">⌄</span>
+                </button>
+                {moreOpen && (
+                  <div className="more-panel">
+                    {secondaryItems.map(item => (
+                      <a
+                        key={item.id}
+                        href={`#${item.id}`}
+                        onClick={(event) => handleNavClick(event, item.id)}
+                        className={currentPage === item.id ? 'active' : ''}
+                      >
+                        {item.label}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
               
               {user && (
                 <div className="user-profile" onClick={() => onNavigate && onNavigate('account')}>
