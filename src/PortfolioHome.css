@@ -18,4 +18,22 @@
 .portfolio-heading button { border: 1px solid #52516d; background: #202033; border-radius: 8px; color: #e0daff; padding: 10px 16px; cursor: pointer; }
 .portfolio-heading button:focus-visible { outline: 2px solid #c9b6ff; outline-offset: 3px; }
 .portfolio-columns { display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); align-items: start; gap: 20px; }
+.portfolio-home :is(.chartsection, .buying, .stats .container, .market-status-box, .poplist) {
+  background: #141a26;
+  border: 1px solid #303849;
+  border-radius: 12px;
+  box-shadow: none;
+}
+.portfolio-home .portfolio-value-label, .portfolio-home .stats .header {
+  color: #bcc5d7;
+  font: 600 12px/1.5 'Inter', sans-serif;
+  letter-spacing: .04em;
+}
+.portfolio-home .portfolio h2 {
+  margin: 6px 0;
+  font: 600 clamp(30px, 4vw, 48px)/1.1 'Inter', sans-serif;
+  letter-spacing: -.045em;
+}
+.portfolio-home .stats .header { position: static; padding: 16px 20px; border-color: #303849; }
+.portfolio-home :is(.status-glow, .status-shimmer) { display: none; }
 @media (max-width: 800px) { .portfolio-columns { grid-template-columns: minmax(0, 1fr); } }

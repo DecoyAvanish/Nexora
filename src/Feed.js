@@ -170,7 +170,8 @@ function Feed() {
       <div className="container">
         <div className="chartsection">
           <div className="portfolio">
-            <h1>$114,656</h1>
+            <span className="portfolio-value-label">Example portfolio value</span>
+            <h2>$114,656</h2>
             <p><span className="positive">+44.63 (+0.04%)</span> Today</p>
           </div>
           <div className="chart-wrapper">
@@ -183,7 +184,7 @@ function Feed() {
           </div>
         </div>
         <div className="buying">
-          <h2>Buying Power</h2>
+          <h2>Example buying power</h2>
           <h2>$4.11</h2>
         </div>
         
