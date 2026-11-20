@@ -15,6 +15,7 @@ import ResearchLab from './ResearchLab';
 import DecisionLab from './DecisionLab';
 import PublicShowcase from './PublicShowcase';
 import AppErrorBoundary from './AppErrorBoundary';
+import './PortfolioHome.css';
 import { auth, onAuthStateChanged } from './firebase';
 
 const ROUTE_HASHES = {'#portfolio':'portfolio','#stocks':'stocks','#cash':'cash','#risk':'risk','#research':'research','#decisions':'decisions','#model-lab':'modelLab','#model-card':'modelCard','#architecture':'architecture','#status':'status','#demo':'demo'};
@@ -158,12 +159,16 @@ function App() {
       case 'portfolio':
       default:
         return (
-          <div className="body">
-            <div className="info">
+          <main className="portfolio-home">
+            <header className="portfolio-heading">
+              <h1>Portfolio overview</h1>
+              <button type="button" onClick={() => handleNavigate('stocks')}>Explore stocks <span aria-hidden="true">→</span></button>
+            </header>
+            <div className="portfolio-columns">
               <Feed />
               <Stats />
             </div>
-          </div>
+          </main>
         );
     }
   };
