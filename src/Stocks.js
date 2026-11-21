@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './Stocks.css';
+import './StockWorkspace.css';
 import { 
   database, 
   doc, 

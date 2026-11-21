@@ -1,0 +1,6 @@
+.stocks-container { background: #0c1019; font-variant-numeric: tabular-nums; }
+.stocks-container :is(.bg-grid,.bg-orbitals,.bg-chartlines,.bg-particles,.bg-scanline,.empty-graphic) { display: none; }
+.stocks-container .terminal-header h1 { color: #edf0f7; font: 600 clamp(26px,4vw,42px)/1.15 Inter,sans-serif; letter-spacing: -.045em; }
+.stocks-container :is(.stock-detail,.trading-panel,.empty-state) { background: #141a26; border: 1px solid #303849; border-radius: 12px; }
+.stocks-container .search-result { width: 100%; text-align: left; background: transparent; color: #edf0f7; cursor: pointer; }
+.stocks-container :is(button,input,select):focus-visible { outline: 2px solid #c9b6ff; outline-offset: 2px; }
