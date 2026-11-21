@@ -1,0 +1,5 @@
+.model-lab { background: #0c1019; }
+.model-lab .lab-hero h1 { font: 600 clamp(30px,4vw,46px)/1.1 Inter,sans-serif; letter-spacing: -.045em; }
+.model-lab .lab-hero h1 span { color: inherit; }
+.model-lab .lab-hero p,.model-lab .lab-version span { color: #bcc5d7; }
+.model-lab .lab-version { background: #141a26; border-color: #303849; }

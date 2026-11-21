@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import 'chart.js/auto';
 import { Bar, Line, Scatter } from 'react-chartjs-2';
 import './ModelLab.css';
+import './EvaluationHeader.css';
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || '/api';
 const pct = (value, digits = 1) => value == null ? 'N/A' : `${(value * 100).toFixed(digits)}%`;
