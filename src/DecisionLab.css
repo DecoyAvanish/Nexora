@@ -3,3 +3,8 @@
 .decision-lab .journal-form { gap: 12px; }
 .decision-lab .journal-form :is(input,textarea,select) { min-width: 0; color: #edf0f7; background: #10151f; border-color: #454e61; font: 14px/1.5 Inter,sans-serif; }
 .decision-lab :is(button,input,select,textarea):focus-visible { outline: 2px solid #c9b6ff; outline-offset: 2px; }
+
+.decision-lab .assistant-answer pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #10151f; color: #d5dceb; line-height: 1.6; }
+.decision-lab .assistant-answer a { color: #d1baff; overflow-wrap: anywhere; }
+.decision-lab .pipeline-table { overflow-x: auto; }
+.decision-lab .pipeline-row { min-width: 520px; font-variant-numeric: tabular-nums; }
