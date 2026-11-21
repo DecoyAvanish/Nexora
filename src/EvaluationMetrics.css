@@ -1,0 +1,4 @@
+.model-lab .lab-metric { background: #141a26; border-color: #303849; }
+.model-lab .lab-metric :is(span,small) { color: #bcc5d7; font: 12px/1.45 Inter,sans-serif; letter-spacing: .015em; text-transform: none; }
+.model-lab .lab-metric strong { font-variant-numeric: tabular-nums; }
+.model-lab .lab-metric small { margin-top: auto; }
