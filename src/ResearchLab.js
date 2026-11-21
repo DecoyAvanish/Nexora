@@ -1,5 +1,6 @@
 import React,{useEffect,useState} from 'react';import axios from 'axios';import {auth,database,doc,getDoc} from './firebase';import './ResearchLab.css';
 import './ResearchWorkspace.css';
+import './ResearchControls.css';
 const API=process.env.REACT_APP_API_BASE_URL||'/api';
 const pct=value=>value==null?'N/A':`${(value*100).toFixed(1)}%`;
 export default function ResearchLab(){

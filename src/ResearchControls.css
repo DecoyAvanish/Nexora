@@ -1,0 +1,5 @@
+.research-lab nav { flex-wrap: wrap; }
+.research-lab nav button.active { background: #382e50; border-color: #9980bd; }
+.research-lab .strategy-settings label { color: #c3cbda; font: 12px/1.5 Inter,sans-serif; }
+.research-lab :is(input,select,textarea,button):focus-visible { outline: 2px solid #c9b6ff; outline-offset: 2px; }
+@media(max-width:540px) { .research-lab .research-controls > * { width: 100%; } }
