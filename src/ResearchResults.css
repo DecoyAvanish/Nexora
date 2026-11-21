@@ -1,0 +1,5 @@
+.research-lab .research-kpis article { background: #10151f; border-color: #303849; }
+.research-lab .research-kpis span,.research-lab .feature-pills span { color: #bcc5d7; font: 12px/1.5 Inter,sans-serif; }
+.research-lab .research-kpis strong { font-variant-numeric: tabular-nums; font-size: 22px; }
+.research-lab small { color: #b5bfd0; font-size: 12px; }
+.research-lab .research-driver { gap: 12px; flex-wrap: wrap; font-size: 12px; }
