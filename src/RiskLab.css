@@ -4,3 +4,9 @@
 .risk-page header p { color: #bcc5d7; line-height: 1.6; }
 .risk-page .risk-metrics article { background: #141a26; border-color: #303849; font-variant-numeric: tabular-nums; }
 .risk-page .risk-metrics small { font: 12px/1.5 Inter,sans-serif; color: #bcc5d7; }
+
+.risk-page .correlation { overflow-x: auto; }
+.risk-page .correlation table { font-variant-numeric: tabular-nums; min-width: max-content; width: 100%; }
+.risk-page .stress strong { white-space: nowrap; }
+.risk-page .stress div { gap: 12px; }
+.risk-page .risk-grid > section { min-width: 0; }
