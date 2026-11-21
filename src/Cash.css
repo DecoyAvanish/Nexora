@@ -11,6 +11,12 @@
   animation: fadeIn 0.6s ease;
 }
 
+.cash-page { background: #0c1019; }
+.cash-page .cash-bg { display: none; }
+.cash-page .balance-card { background: #141a26; border: 1px solid #303849; border-radius: 12px; }
+.cash-page .balance-amount { font-variant-numeric: tabular-nums; }
+.cash-page .balance-label { color: #c4ccdc; font: 600 12px/1.5 Inter,sans-serif; }
+
 .cash-page::-webkit-scrollbar {
   width: 5px;
   height: 5px;
