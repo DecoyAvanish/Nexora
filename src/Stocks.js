@@ -721,6 +721,7 @@ function Stocks() {
           <input
             type="text"
             placeholder="Enter symbol (AAPL, MSFT, TSLA...)"
+            aria-label="Search by stock symbol"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="search-input"
@@ -730,10 +731,10 @@ function Stocks() {
         {searchResults.length > 0 && (
           <div className="search-dropdown">
             {searchResults.map((stock) => (
-              <div key={stock.symbol} className="search-result" onClick={() => selectStock(stock)}>
+              <button type="button" key={stock.symbol} className="search-result" onClick={() => selectStock(stock)}>
                 <span className="result-symbol">{stock.symbol}</span>
                 <span className="result-name">{stock.description}</span>
-              </div>
+              </button>
             ))}
           </div>
         )}
@@ -779,9 +780,9 @@ function Stocks() {
           </div>
           <div className="watchlist-items">
             {watchlist.map((symbol) => (
-              <div key={symbol} className="watchlist-item" onClick={() => selectStock({ symbol })}>
+              <button type="button" key={symbol} className="watchlist-item" onClick={() => selectStock({ symbol })}>
                 {symbol}
-              </div>
+              </button>
             ))}
           </div>
         </div>
