@@ -1,0 +1,4 @@
+.research-lab { padding: clamp(32px,6vw,78px) clamp(16px,4vw,40px) 72px; }
+.research-lab h1 { font: 600 clamp(28px,4vw,42px)/1.15 Inter,sans-serif; letter-spacing: -.045em; }
+.research-lab header p { color: #bcc5d7; font: 14px/1.6 Inter,sans-serif; }
+.research-lab section { background: #141a26; border-color: #303849; border-radius: 12px; }
