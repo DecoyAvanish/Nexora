@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import 'chart.js/auto';
 import { Bar, Line, Scatter } from 'react-chartjs-2';
 import './ModelLab.css';
+import './EvaluationEvidence.css';
 import './EvaluationMetrics.css';
 import './EvaluationHeader.css';
 

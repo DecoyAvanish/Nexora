@@ -1,0 +1,6 @@
+.model-lab .lab-panel { background: #141a26; border-color: #303849; }
+.model-lab .lab-panel-title { flex-wrap: wrap; gap: 8px; }
+.model-lab .lab-panel-title p,.model-lab .baseline-row .unavailable,.model-lab .lab-limitations li { color: #b9c2d3; }
+.model-lab .baseline-row { gap: 8px; flex-wrap: wrap; align-items: baseline; }
+.model-lab .lab-chart { min-width: 0; }
+.model-lab .feature-list > div { gap: 8px; overflow-wrap: anywhere; }
