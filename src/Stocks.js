@@ -712,17 +712,7 @@ function Stocks() {
       <div className="bg-scanline"></div>
 
       <div className="terminal-header">
-        <div className="terminal-brand">
-          <span className="brand-dot">●</span>
-          <span className="brand-name">NEXORA</span>
-          <span className="brand-sep">//</span>
-          <span className="brand-module">MARKET</span>
-        </div>
-        <div className="terminal-status">
-          <span className="status-ping"></span>
-          <span className="status-text">LIVE</span>
-          <span className="status-time">{new Date().toLocaleTimeString()}</span>
-        </div>
+        <h1>Stock research</h1>
       </div>
 
       <div className="search-section">
