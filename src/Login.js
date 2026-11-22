@@ -75,13 +75,13 @@ function Login({ onLogin, onSwitchToSignUp }) {
         
         <form onSubmit={handleLogin} className="form">
           <div className="group">
-            <label>Username / Email</label>
+            <label htmlFor="login-email">Email address</label>
             <div className="wrapper">
               <input
-                type="email"
+                type="email" id="login-email" autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@edge.com"
+                placeholder="you@example.com"
                 required
               />
               <span className="icon">⌘</span>
@@ -89,10 +89,10 @@ function Login({ onLogin, onSwitchToSignUp }) {
           </div>
           
           <div className="group">
-            <label>Access Key</label>
+            <label htmlFor="login-password">Password</label>
             <div className="wrapper">
               <input
-                type="password"
+                type="password" id="login-password" autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
