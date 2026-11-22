@@ -69,8 +69,8 @@ function Login({ onLogin, onSwitchToSignUp }) {
               <span className="icon">📈</span>
             </div>
           </div>
-          <h1>Elevate Your Portfolio</h1>
-          <p className="subtitle">Enter the <span>Nexora</span> Terminal</p>
+          <h1>Sign in to Nexora</h1>
+          <p className="subtitle">Open your portfolio and research workspace.</p>
         </div>
         
         <form onSubmit={handleLogin} className="form">
@@ -106,7 +106,7 @@ function Login({ onLogin, onSwitchToSignUp }) {
           
           <button type="submit" className="btn" disabled={loading}>
             <span className="content">
-              {loading ? 'Authenticating...' : 'Enter the Matrix'}
+              {loading ? 'Signing in…' : 'Sign in'}
               <span className="arrow">→</span>
             </span>
           </button>
@@ -118,12 +118,12 @@ function Login({ onLogin, onSwitchToSignUp }) {
         
         <div className="footer">
           <p>
-            Ready to dominate the markets?{' '}
+            New to Nexora?{' '}
             <button 
               className="switchbtn" 
               onClick={onSwitchToSignUp}
             >
-              Join the Elite
+              Create an account
             </button>
           </p>
         </div>
