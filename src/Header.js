@@ -60,7 +60,7 @@ function Header({ onNavigate, currentPage, user, onLogout }) {
                 <a
                   key={item.id}
                   href={`#${routeHash(item.id)}`}
-                  onClick={(e) => handleNavClick(e, item.id)}
+                  onClick={(e) => handleNavClick(e, item.id)} aria-current={currentPage === item.id ? 'page' : undefined}
                   className={currentPage === item.id ? 'active' : ''}
                 >
                   {item.label}
@@ -82,7 +82,7 @@ function Header({ onNavigate, currentPage, user, onLogout }) {
                       <a
                         key={item.id}
                         href={`#${routeHash(item.id)}`}
-                        onClick={(event) => handleNavClick(event, item.id)}
+                        onClick={(event) => handleNavClick(event, item.id)} aria-current={currentPage === item.id ? 'page' : undefined}
                         className={currentPage === item.id ? 'active' : ''}
                       >
                         {item.label}
