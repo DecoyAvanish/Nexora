@@ -102,7 +102,7 @@ function Login({ onLogin, onSwitchToSignUp }) {
             </div>
           </div>
           
-          {error && <div className="error">{error}</div>}
+          {error && <div className="error" role="alert">{error}</div>}
           
           <button type="submit" className="btn" disabled={loading}>
             <span className="content">
