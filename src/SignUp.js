@@ -139,28 +139,28 @@ function SignUp({ onSignUp, onSwitchToLogin }) {
           </div>
           
           <div className="group">
-            <label>Secret Key</label>
+            <label htmlFor="signup-password">Password</label>
             <div className="wrapper">
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Create your code"
+                id="signup-password" autoComplete="new-password" minLength={6} aria-describedby="password-hint"
                 required
               />
               <span className="icon">⚡</span>
             </div>
-            <small className="hint">Minimum 6 characters • Must be unbreakable</small>
+            <small className="hint" id="password-hint">Use at least 6 characters.</small>
           </div>
           
           <div className="group">
-            <label>Confirm Secret Key</label>
+            <label htmlFor="signup-confirm">Confirm password</label>
             <div className="wrapper">
               <input
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Verify your code"
+                id="signup-confirm" autoComplete="new-password"
                 required
               />
               <span className="icon">✓</span>
