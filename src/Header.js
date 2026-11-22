@@ -55,7 +55,7 @@ function Header({ onNavigate, currentPage, user, onLogout }) {
               </div>
             </div>
             
-            <div className="menu">
+            <div className="menu" role="navigation" aria-label="Workspace">
               {primaryItems.map((item) => (
                 <a
                   key={item.id}
