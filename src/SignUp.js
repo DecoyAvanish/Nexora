@@ -105,8 +105,8 @@ function SignUp({ onSignUp, onSwitchToLogin }) {
               <span className="icon">🚀</span>
             </div>
           </div>
-          <h1>Forge Your Legacy</h1>
-          <p className="subtitle">Join the <span>Nexora</span> Revolution</p>
+          <h1>Create your Nexora account</h1>
+          <p className="subtitle">Set up your research workspace.</p>
         </div>
         
         <form onSubmit={handleSignUp} className="form">
@@ -171,7 +171,7 @@ function SignUp({ onSignUp, onSwitchToLogin }) {
           
           <button type="submit" className="btn" disabled={loading}>
             <span className="content">
-              {loading ? 'Forging Account...' : 'Start Your Empire'}
+              {loading ? 'Creating account…' : 'Create account'}
               <span className="arrow">→</span>
             </span>
           </button>
@@ -188,7 +188,7 @@ function SignUp({ onSignUp, onSwitchToLogin }) {
               className="switchbtn" 
               onClick={onSwitchToLogin}
             >
-              Enter the Terminal
+              Sign in
             </button>
           </p>
         </div>
