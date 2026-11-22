@@ -67,7 +67,12 @@ function Header({ onNavigate, currentPage, user, onLogout }) {
                 </a>
               ))}
 
-              <div className="more-menu" ref={moreRef}>
+              <div className="more-menu" ref={moreRef} onKeyDown={event => {
+                if (moreOpen && event.key === 'Escape') {
+                  setMoreOpen(false);
+                  moreRef.current.querySelector('button').focus();
+                }
+              }}>
                 <button
                   type="button"
                   className={`more-trigger ${secondaryItems.some(item => item.id === currentPage) ? 'active' : ''}`}
