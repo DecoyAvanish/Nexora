@@ -111,13 +111,13 @@ function SignUp({ onSignUp, onSwitchToLogin }) {
         
         <form onSubmit={handleSignUp} className="form">
           <div className="group">
-            <label>Full Name</label>
+            <label htmlFor="signup-name">Full name</label>
             <div className="wrapper">
               <input
-                type="text"
+                type="text" id="signup-name" autoComplete="name"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Your Identity"
+                placeholder="Full name"
                 required
               />
               <span className="icon">◈</span>
@@ -125,13 +125,13 @@ function SignUp({ onSignUp, onSwitchToLogin }) {
           </div>
           
           <div className="group">
-            <label>Email Address</label>
+            <label htmlFor="signup-email">Email address</label>
             <div className="wrapper">
               <input
-                type="email"
+                type="email" id="signup-email" autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@empire.com"
+                placeholder="you@example.com"
                 required
               />
               <span className="icon">⌘</span>
