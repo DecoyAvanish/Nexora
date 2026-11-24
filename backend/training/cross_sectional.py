@@ -72,7 +72,8 @@ def prepare_frame(frame: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
                 feature_columns.append(sector_rank)
     if not feature_columns:
         raise ValueError("No numeric feature columns were found.")
-    return data.dropna(subset=feature_columns).sort_values(["date", "ticker"]), feature_columns
+    data[feature_columns] = data[feature_columns].replace([np.inf, -np.inf], np.nan)
+    return data.dropna(subset=feature_columns, how="all").sort_values(["date", "ticker"]), feature_columns
 
 
 def assign_deciles(probabilities: pd.Series) -> pd.Series:
