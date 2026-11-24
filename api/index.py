@@ -265,7 +265,7 @@ class handler(BaseHTTPRequestHandler):
                 return self.send_json({"error": {"message": "Request too large."}}, 413)
             body = self.rfile.read(size) if self.command == "POST" else None
             req = Request(target, data=body, headers={"Content-Type": "application/json"}, method=self.command)
-            with urlopen(req, timeout=25) as result:
+            with urlopen(req, timeout=100) as result:
                 content = result.read()
                 self.send_response(200)
                 self.send_header("Content-Type", result.headers.get_content_type())
@@ -285,7 +285,7 @@ class handler(BaseHTTPRequestHandler):
         body = json.dumps(payload, separators=(",", ":")).encode("utf-8")
         self.send_response(status_code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Cache-Control", "public, s-maxage=300, stale-while-revalidate=86400")
+        self.send_header("Cache-Control", "public, s-maxage=300, stale-while-revalidate=86400" if status_code == 200 else "no-store")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)

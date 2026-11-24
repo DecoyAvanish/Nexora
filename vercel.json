@@ -5,6 +5,7 @@
   "outputDirectory": "build",
   "functions": {
     "api/index.py": {
+      "maxDuration": 120,
       "includeFiles": "api/model_lab.json"
     }
   },
