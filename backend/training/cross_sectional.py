@@ -28,6 +28,8 @@ class FoldMetrics:
     momentum_auc: float
     momentum_information_coefficient: float
     neutral_auc: float = 0.5
+    brier_score: float | None = None
+    base_rate_brier_score: float | None = None
 
 
 @dataclass
@@ -150,6 +152,8 @@ def train_walk_forward(data: pd.DataFrame, feature_columns: list[str], *, train_
         folds.append(FoldMetrics(str(train_dates[0]), str(train_dates[-1]), str(test_dates[0]), str(test_dates[-1]), len(test), _safe_auc(test["y"], test["probability"]), float(test["probability"].corr(excess_return, method="spearman")), float(spread), _safe_auc(test["y"], momentum), float(momentum.corr(excess_return, method="spearman"))))
         columns = ["date", "ticker", "sector", "probability", "momentum_probability", "technical_probability", "sentiment_probability", "random_probability", "ai_score", "universe_percentile", "sector_percentile", "fwd_ret_63d", "bench_ret_63d", "y"]
         scored_frames.append(test[[column for column in columns if column in test]])
+        folds[-1].brier_score = float(((test["probability"] - test["y"]) ** 2).mean())
+        folds[-1].base_rate_brier_score = float(((train["y"].mean() - test["y"]) ** 2).mean())
         importance_frames.append(pd.DataFrame({"fold": len(folds), "feature": feature_columns, "importance": bundle.model.feature_importances_}))
     if not folds:
         raise ValueError("Not enough observations for one calibrated purged walk-forward fold.")
