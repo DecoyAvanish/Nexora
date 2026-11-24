@@ -35,9 +35,11 @@ class CalibratedModel:
     model: object
     calibrator: object
     feature_columns: list[str]
+    use_margin: bool = False
 
     def predict_proba(self, frame: pd.DataFrame) -> np.ndarray:
-        raw = self.model.predict_proba(frame[self.feature_columns])[:, 1]
+        inputs = frame[self.feature_columns]
+        raw = self.model.predict(inputs, raw_score=True) if self.use_margin else self.model.predict_proba(inputs)[:, 1]
         calibrated = self.calibrator.predict_proba(raw.reshape(-1, 1))[:, 1]
         return np.column_stack([1 - calibrated, calibrated])
 
@@ -101,10 +103,10 @@ def fit_calibrated_model(train: pd.DataFrame, feature_columns: list[str], calibr
         raise ValueError("Fitting and calibration each require both outperformance outcomes.")
     model = _new_model()
     model.fit(fit[feature_columns], fit["y"].astype(int))
-    raw_probability = model.predict_proba(calibration[feature_columns])[:, 1]
+    margins = model.predict(calibration[feature_columns], raw_score=True)
     calibrator = LogisticRegression(random_state=42)
-    calibrator.fit(raw_probability.reshape(-1, 1), calibration["y"].astype(int))
-    return CalibratedModel(model, calibrator, feature_columns)
+    calibrator.fit(margins.reshape(-1, 1), calibration["y"].astype(int))
+    return CalibratedModel(model, calibrator, feature_columns, use_margin=True)
 
 
 def _safe_auc(labels, probability) -> float:
