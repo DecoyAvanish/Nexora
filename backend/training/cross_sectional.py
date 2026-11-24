@@ -184,6 +184,8 @@ def publish_artifact(bundle: CalibratedModel, folds: list[FoldMetrics], walk_for
     metrics = [asdict(fold) for fold in folds]
     (version_directory / "metrics.json").write_text(json.dumps(metrics, indent=2))
     manifest = {"model_version": version, "data_through": data_through, "created_at": datetime.now(timezone.utc).isoformat(), "universe": "S&P 500", "horizon_trading_days": 63, "feature_count": len(bundle.feature_columns), "fold_count": len(folds), "artifact_directory": str(version_directory), "mean_model_auc": float(np.mean([fold.model_auc for fold in folds])), "mean_momentum_auc": float(np.mean([fold.momentum_auc for fold in folds])), "mean_information_coefficient": float(np.mean([fold.model_information_coefficient for fold in folds]))}
+    manifest["feature_columns"] = list(bundle.feature_columns)
+    manifest["calibration_input"] = "margin" if bundle.use_margin else "probability"
     (version_directory / "manifest.json").write_text(json.dumps(manifest, indent=2))
     artifact_root.mkdir(parents=True, exist_ok=True)
     (artifact_root / "latest.json").write_text(json.dumps(manifest, indent=2))
