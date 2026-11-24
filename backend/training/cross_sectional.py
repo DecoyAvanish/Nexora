@@ -88,10 +88,11 @@ def fit_calibrated_model(train: pd.DataFrame, feature_columns: list[str], calibr
     from sklearn.linear_model import LogisticRegression
 
     dates = np.array(sorted(train["date"].unique()))
-    if len(dates) <= calibration_days:
+    horizon = 63  # The target spans the next 63 trading sessions.
+    if calibration_days < 1 or len(dates) <= calibration_days + horizon:
         raise ValueError("Training data does not contain enough dates for probability calibration.")
     calibration_dates = dates[-calibration_days:]
-    fit = train[~train["date"].isin(calibration_dates)]
+    fit = train[train["date"].isin(dates[:-(calibration_days + horizon)])]
     calibration = train[train["date"].isin(calibration_dates)]
     model = _new_model()
     model.fit(fit[feature_columns], fit["y"].astype(int))
