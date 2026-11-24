@@ -97,6 +97,8 @@ def fit_calibrated_model(train: pd.DataFrame, feature_columns: list[str], calibr
     calibration_dates = dates[-calibration_days:]
     fit = train[train["date"].isin(dates[:-(calibration_days + horizon)])]
     calibration = train[train["date"].isin(calibration_dates)]
+    if fit["y"].nunique() < 2 or calibration["y"].nunique() < 2:
+        raise ValueError("Fitting and calibration each require both outperformance outcomes.")
     model = _new_model()
     model.fit(fit[feature_columns], fit["y"].astype(int))
     raw_probability = model.predict_proba(calibration[feature_columns])[:, 1]
