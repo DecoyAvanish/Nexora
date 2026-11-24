@@ -54,7 +54,7 @@ def prepare_frame(frame: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
     data["date"] = pd.to_datetime(data["date"], utc=True)
     if data.duplicated(["date", "ticker"]).any() or data[["date", "ticker"]].isna().any().any():
         raise ValueError("Expected unique, nonmissing ticker-date observations.")
-    has_label = data["fwd_ret_63d"].notna() & data["bench_ret_63d"].notna()
+    has_label = np.isfinite(data["fwd_ret_63d"]) & np.isfinite(data["bench_ret_63d"])
     data["y"] = np.where(has_label, (data["fwd_ret_63d"] > data["bench_ret_63d"]).astype(int), np.nan)
     ranked_columns = [column for column in data.columns if column.endswith("_universe_rank") or column.endswith("_sector_rank")]
     if ranked_columns:
