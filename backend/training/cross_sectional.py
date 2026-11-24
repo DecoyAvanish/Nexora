@@ -109,6 +109,8 @@ def _safe_auc(labels, probability) -> float:
 
 def train_walk_forward(data: pd.DataFrame, feature_columns: list[str], *, train_days: int = 756, test_days: int = 63, embargo_days: int = 63, calibration_days: int = 63):
     labeled = data.dropna(subset=["y"]).copy()
+    if embargo_days < 63 or calibration_days < 1 or test_days < 1 or train_days <= calibration_days + 63:
+        raise ValueError("Invalid window lengths for the 63-session target and purged calibration.")
     dates = np.array(sorted(labeled["date"].unique()))
     folds: list[FoldMetrics] = []
     scored_frames = []
