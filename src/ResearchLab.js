@@ -7,7 +7,18 @@ export default function ResearchLab(){
  const run=async action=>{setLoading(true);setError('');try{await action()}catch(err){setError(err.response?.data?.error?.message||err.message)}finally{setLoading(false)}};
  const replayScore=()=>run(async()=>setReplay((await axios.get(`${API}/replay/${symbol}?date=${date}`)).data));
  const config={...strategy,conditions:[{...condition,value:Number(condition.value)}]};const runBacktest=()=>run(async()=>setBacktest((await axios.post(`${API}/strategy/backtest`,config)).data));
- const download=()=>run(async()=>{const response=await axios.post(`${API}/strategy/backtest.csv`,config,{responseType:'blob'});const url=URL.createObjectURL(response.data);const link=document.createElement('a');link.href=url;link.download='nexora-backtest-trades.csv';link.click();URL.revokeObjectURL(url)});
+ const download=()=>{
+   const columns=['date','ticker','sector','weight','ai_score','probability'];
+   const quote=value=>'"'+String(value??'').replaceAll('"','""')+'"';
+   const rows=backtest.trades.map(trade=>columns.map(column=>quote(trade[column])).join(','));
+   const csv=[columns.join(','),...rows].join('\r\n');
+   const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+   const link=document.createElement('a');
+   link.href=url;
+   link.download='nexora-backtest-trades.csv';
+   link.click();
+   setTimeout(()=>URL.revokeObjectURL(url),1000);
+ };
  const optimize=()=>run(async()=>setOptimization((await axios.post(`${API}/portfolio/optimize`,{symbols:symbols.split(',').map(s=>s.trim()).filter(Boolean),mode,sector_limit:.4})).data));
  const monitor=()=>run(async()=>setWatch((await axios.post(`${API}/watchlist/intelligence`,{symbols:symbols.split(',').map(s=>s.trim()).filter(Boolean)})).data));
  const frontier=optimization?.efficient_frontier||[];const maxV=Math.max(...frontier.map(p=>p.volatility),.01),minR=Math.min(...frontier.map(p=>p.return),0),maxR=Math.max(...frontier.map(p=>p.return),.01);const points=frontier.map(p=>`${p.volatility/maxV*100},${100-(p.return-minR)/(maxR-minR||1)*100}`).join(' ');
